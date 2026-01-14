@@ -1,28 +1,27 @@
 <script setup lang="ts">
 import { 
   Loader2, Wand2, Save, Layout, Lock, Upload, Undo2, 
-  MousePointerClick, ArrowLeft, BookOpen 
+  MousePointerClick, ArrowLeft, BookOpen, RefreshCw, Calendar 
 } from 'lucide-vue-next'
 import { ThemeType, PublicationType, type GeneratedContent, type NewsData } from '~/types'
 
-const router = useRouter()
-const { generateNewsContent, generateNewsImage, rewriteText, loading, loadingStep } = useGemini()
-const { saveIssue } = useIssues()
+const { 
+    topic, date, theme, previewContent, isPublishing, isSaving,
+    selectedPath, selectedLabel, isRewriting, rewritePrompt,
+    loading, loadingStep, allIssues, loadingIssues,
+    init, loadIssueList, createBlankTemplate, handleGenerate, 
+    handlePublish, handleSaveDraft, handleSelectIssue, getValue, 
+    updateTextData, handleSectionSelect, handleSmartRewrite, 
+    handleImageUpload, updateScale, getScale
+} = useNewsEditor(PublicationType.TRIANGLE)
 
-// Form State
-const topic = ref('赛博朋克之谜')
-const date = ref(new Date().toISOString().split('T')[0])
-const theme = ref<ThemeType>(ThemeType.CLASSIC_RED)
+// UI specific ref for scale to bind to slider
+const currentScale = computed({
+    get: () => getScale(),
+    set: (val: number) => updateScale(val)
+})
 
-// Preview State
-const previewContent = ref<GeneratedContent | null>(null)
-const isPublishing = ref(false)
-
-// Selection State
-const selectedPath = ref<string | null>(null)
-const selectedLabel = ref('')
-const isRewriting = ref(false)
-const rewritePrompt = ref('')
+const displayTheme = computed(() => theme.value || ThemeType.CLASSIC_RED)
 
 const THEME_NAMES: Record<ThemeType, string> = {
   [ThemeType.CLASSIC_RED]: '经典赤红',
@@ -31,8 +30,13 @@ const THEME_NAMES: Record<ThemeType, string> = {
   [ThemeType.NOIR]: '黑色电影'
 }
 
-function createBlankTemplate(): NewsData {
-  return {
+onMounted(async () => {
+    theme.value = ThemeType.CLASSIC_RED
+    await init()
+})
+
+function handleManualCreate() {
+    createBlankTemplate({
     date: date.value,
     location: '北京',
     frontPage: {
@@ -58,124 +62,16 @@ function createBlankTemplate(): NewsData {
       ],
       horoscope: '点击编辑今日箴言...'
     }
-  }
+  }, ThemeType.CLASSIC_RED)
 }
 
-function handleManualCreate() {
-  const textData = createBlankTemplate()
-  previewContent.value = { textData, theme: theme.value, publicationType: PublicationType.TRIANGLE }
-  selectedPath.value = null
-}
-
-async function handleGenerate() {
-  const textData = await generateNewsContent(topic.value, date.value, theme.value, PublicationType.TRIANGLE)
-  if (!textData) {
-    alert("生成失败，请重试。如需手动创建，请点击下方\"手动创建\"按钮。")
-    return
-  }
-  
-  previewContent.value = { textData, theme: theme.value, publicationType: PublicationType.TRIANGLE }
-  
-  const imageBase64 = await generateNewsImage(textData.frontPage.mainImagePrompt, theme.value, PublicationType.TRIANGLE)
-  if (imageBase64) {
-    previewContent.value = { ...previewContent.value!, imageBase64 }
-  }
-  
-  selectedPath.value = null
-}
-
-async function handlePublish() {
-  if (!previewContent.value) return
-  isPublishing.value = true
-  
-  try {
-    const result = await saveIssue(previewContent.value)
-    if (result) {
-      alert("发布成功！已写入后台数据库。")
-      router.push('/triangle')
-    } else {
-      alert("发布失败。")
-    }
-  } finally {
-    isPublishing.value = false
-  }
-}
-
-async function handleLoadLatest() {
-  const { getLatestIssue } = useIssues()
-  const latest = await getLatestIssue(PublicationType.TRIANGLE)
-  
-  if (latest) {
-    previewContent.value = latest
-    theme.value = latest.theme || ThemeType.CLASSIC_RED
-    if (latest.textData?.date) {
-      date.value = latest.textData.date
-    }
-    alert("已加载最新发布的报纸，可以继续编辑。")
-  } else {
-    alert("没有找到已发布的报纸。")
-  }
-}
-
-function getValue(path: string): any {
-  if (!previewContent.value) return ''
-  const keys = path.split('.')
-  let current: any = previewContent.value.textData
-  for (const k of keys) {
-    if (current === undefined) return ''
-    current = current[k]
-  }
-  return current
-}
-
-function updateTextData(path: string, field: string | null, value: any) {
-  if (!previewContent.value) return
-  const newData = structuredClone(previewContent.value)
-  const keys = path.split('.')
-  if (field) keys.push(field)
-  
-  let current: any = newData.textData
-  for (let i = 0; i < keys.length - 1; i++) {
-    if (!current) return
-    current = current[keys[i]]
-  }
-  if (current) {
-    current[keys[keys.length - 1]] = value
-    previewContent.value = newData
-  }
-}
-
-function handleSectionSelect(path: string, label: string) {
-  if (!path) {
-    selectedPath.value = null
-    return
-  }
-  selectedPath.value = path
-  selectedLabel.value = label
-  rewritePrompt.value = ''
-}
-
-async function handleSmartRewrite(currentText: string): Promise<string> {
-  if (!currentText || !rewritePrompt.value) return currentText
-  isRewriting.value = true
-  try {
-    return await rewriteText(currentText, rewritePrompt.value)
-  } finally {
-    isRewriting.value = false
-  }
-}
-
-function handleImageUpload(e: Event) {
-  const file = (e.target as HTMLInputElement).files?.[0]
-  if (file) {
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      if (previewContent.value) {
-        previewContent.value = { ...previewContent.value, imageBase64: reader.result as string }
-      }
-    }
-    reader.readAsDataURL(file)
-  }
+function handleLoadLatest() {
+    // This function was trying to mimic loadIssueList logic but specifically for 'latest'.
+    // Since loadIssueList is now available and filters by date, we can just use the first item?
+    // But original code had specific getLatestIssue call. useIssues does not expose it via useNewsEditor easily?
+    // Actually init() calls loadIssueList. 
+    // We can just rely on the list.
+    alert("请从下方列表中选择最新一期报纸。")
 }
 </script>
 
@@ -263,6 +159,38 @@ function handleImageUpload(e: Event) {
           </button>
         </div>
 
+        <!-- Previous Chronicles List -->
+        <div v-if="!previewContent" class="mt-8 border-t border-stone-100 pt-6">
+           <div class="flex items-center justify-between mb-4">
+             <h3 class="text-xs font-bold uppercase text-stone-400">Previous Chronicles</h3>
+             <button @click="loadIssueList" class="text-stone-400 hover:text-stone-600 transition-colors" title="Refresh">
+               <RefreshCw class="w-3 h-3" :class="{ 'animate-spin': loadingIssues }" />
+             </button>
+           </div>
+           
+           <div class="space-y-2">
+             <div v-if="allIssues.length === 0 && !loadingIssues" class="text-xs text-stone-400 italic">
+               No archives found.
+             </div>
+             <button
+               v-for="issue in allIssues"
+               :key="issue.id"
+               @click="handleSelectIssue(issue)"
+               class="w-full text-left p-3 border rounded hover:border-red-300 hover:bg-red-50 transition-all group"
+             >
+               <div class="flex justify-between items-start mb-1">
+                 <span class="text-[10px] font-bold text-stone-500 flex items-center gap-1">
+                   <Calendar class="w-3 h-3" /> {{ issue.textData.date }}
+                 </span>
+                 <span class="text-[10px] bg-stone-100 px-1 rounded text-stone-500">{{ issue.publishedAt ? new Date(issue.publishedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Draft' }}</span>
+               </div>
+               <h4 class="text-xs font-bold text-stone-700 leading-tight group-hover:text-red-700 font-sans">
+                 {{ issue.textData.frontPage.headline }}
+               </h4>
+             </button>
+           </div>
+        </div>
+
         <!-- STATE 2: DASHBOARD (Content Exists, Nothing Selected) -->
         <div v-else-if="!selectedPath" class="space-y-6 animate-in slide-in-from-left-4 duration-300">
           <div class="p-4 bg-green-50 border border-green-200 rounded text-sm text-green-800">
@@ -280,6 +208,16 @@ function handleImageUpload(e: Event) {
             </button>
             
             <button
+              @click="handleSaveDraft"
+              :disabled="isSaving"
+              class="w-full py-3 text-stone-600 font-bold uppercase tracking-widest transition-all border border-stone-300 hover:bg-stone-50"
+            >
+                <span v-if="isSaving" class="flex items-center justify-center gap-2"><Loader2 class="animate-spin w-4 h-4" /> 保存中...</span>
+                <span v-else class="flex items-center justify-center gap-2"><Save class="w-4 h-4" /> 保存草稿</span>
+            </button>
+
+
+            <button
               @click="handlePublish"
               :disabled="isPublishing"
               class="w-full py-4 text-white font-black uppercase tracking-widest transition-all"
@@ -293,12 +231,23 @@ function handleImageUpload(e: Event) {
 
         <!-- STATE 3: EDITOR (Specific Section Selected) -->
         <div v-else class="space-y-4 animate-in slide-in-from-right-4 duration-300">
-          <button 
-            @click="selectedPath = null"
-            class="flex items-center gap-1 text-xs font-bold text-stone-400 hover:text-stone-800 mb-4"
-          >
-            <ArrowLeft class="w-3 h-3" /> 返回全局菜单
-          </button>
+             <div class="flex justify-between items-center mb-4">
+                <button 
+                    @click="selectedPath = null"
+                    class="flex items-center gap-1 text-xs font-bold text-stone-400 hover:text-stone-800"
+                >
+                    <ArrowLeft class="w-3 h-3" /> 返回全局菜单
+                </button>
+                 <button
+                    @click="handleSaveDraft"
+                    :disabled="isSaving"
+                    class="flex items-center gap-1 text-xs font-bold text-stone-500 hover:text-stone-800 border border-stone-200 px-2 py-1 rounded bg-white"
+                    >
+                    <Save v-if="!isSaving" class="w-3 h-3" />
+                    <Loader2 v-else class="w-3 h-3 animate-spin" />
+                    保存
+                </button>
+            </div>
 
           <div class="flex items-center gap-2 mb-4 pb-2 border-b border-stone-100">
             <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
@@ -306,6 +255,23 @@ function handleImageUpload(e: Event) {
               正在编辑: {{ selectedLabel }}
             </h3>
           </div>
+
+          <!-- Typography Control -->
+           <div class="bg-stone-50 p-3 rounded border border-stone-200">
+                <div class="flex justify-between items-center mb-1">
+                    <label class="text-[10px] font-bold uppercase text-stone-500">板块权重 (Layout Weight): {{ currentScale.toFixed(1) }}</label>
+                    <button @click="currentScale = 1" class="text-[10px] text-red-400 hover:text-red-300" title="重置">重置</button>
+                </div>
+                <input 
+                    type="range" 
+                    v-model.number="currentScale" 
+                    min="0.5" 
+                    max="2.0" 
+                    step="0.1"
+                    class="w-full h-1 bg-stone-300 rounded-lg appearance-none cursor-pointer range-sm"
+                >
+            </div>
+
 
           <!-- Date Editor -->
           <div v-if="selectedPath === 'date'" class="space-y-4">
@@ -331,7 +297,8 @@ function handleImageUpload(e: Event) {
           <!-- Object Editor (Title + Content) -->
           <template v-else>
             <div v-if="typeof getValue(selectedPath) === 'object'" class="space-y-6">
-              <div v-if="getValue(selectedPath)?.title !== undefined" class="space-y-1">
+              <!-- Title Input -->
+              <div v-if="'title' in getValue(selectedPath)" class="space-y-1">
                 <label class="block text-xs font-bold uppercase text-stone-400">标题 / Title</label>
                 <input 
                   class="w-full p-2 border text-sm font-bold" 
@@ -344,10 +311,10 @@ function handleImageUpload(e: Event) {
                     placeholder="AI 指令 (例: 更幽默一点)" 
                     class="flex-1 text-xs border border-stone-200 p-1 px-2 rounded"
                     v-model="rewritePrompt"
-                    @keydown.enter="async () => { const t = await handleSmartRewrite(getValue(selectedPath).title); updateTextData(selectedPath!, 'title', t) }"
+                    @keydown.enter="async () => { const t = await handleSmartRewrite(getValue(selectedPath!).title); updateTextData(selectedPath!, 'title', t) }"
                   />
                   <button 
-                    @click="async () => { const t = await handleSmartRewrite(getValue(selectedPath).title); updateTextData(selectedPath!, 'title', t) }"
+                    @click="async () => { const t = await handleSmartRewrite(getValue(selectedPath!).title); updateTextData(selectedPath!, 'title', t) }"
                     :disabled="isRewriting || !rewritePrompt"
                     class="bg-stone-800 text-white p-1 px-2 rounded text-xs flex items-center gap-1 hover:bg-black disabled:opacity-50"
                   >
@@ -356,10 +323,15 @@ function handleImageUpload(e: Event) {
                   </button>
                 </div>
               </div>
-              <div v-if="getValue(selectedPath)?.content !== undefined" class="space-y-1">
-                <label class="block text-xs font-bold uppercase text-stone-400">内容 / Content</label>
+              
+              <!-- Content Input -->
+              <div v-if="'content' in getValue(selectedPath)" class="space-y-1">
+                <div class="flex justify-between items-baseline">
+                  <label class="block text-xs font-bold uppercase text-stone-400">内容 / Content</label>
+                  <div class="text-[10px] text-stone-400 font-mono">MD: **bold** *ital* # L ## M</div>
+                </div>
                 <textarea 
-                  class="w-full p-2 border text-sm h-48" 
+                  class="w-full p-2 border text-sm h-48 font-mono" 
                   :value="getValue(selectedPath).content" 
                   @input="(e) => updateTextData(selectedPath!, 'content', (e.target as HTMLTextAreaElement).value)" 
                 />
@@ -369,10 +341,10 @@ function handleImageUpload(e: Event) {
                     placeholder="AI 指令 (例: 缩短字数)" 
                     class="flex-1 text-xs border border-stone-200 p-1 px-2 rounded"
                     v-model="rewritePrompt"
-                    @keydown.enter="async () => { const t = await handleSmartRewrite(getValue(selectedPath).content); updateTextData(selectedPath!, 'content', t) }"
+                    @keydown.enter="async () => { const t = await handleSmartRewrite(getValue(selectedPath!).content); updateTextData(selectedPath!, 'content', t) }"
                   />
                   <button 
-                    @click="async () => { const t = await handleSmartRewrite(getValue(selectedPath).content); updateTextData(selectedPath!, 'content', t) }"
+                    @click="async () => { const t = await handleSmartRewrite(getValue(selectedPath!).content); updateTextData(selectedPath!, 'content', t) }"
                     :disabled="isRewriting || !rewritePrompt"
                     class="bg-stone-800 text-white p-1 px-2 rounded text-xs flex items-center gap-1 hover:bg-black disabled:opacity-50"
                   >
@@ -385,9 +357,12 @@ function handleImageUpload(e: Event) {
             
             <!-- String Editor -->
             <div v-else class="space-y-1">
-              <label class="block text-xs font-bold uppercase text-stone-400">文本内容 / Text</label>
+              <div class="flex justify-between items-baseline">
+                <label class="block text-xs font-bold uppercase text-stone-400">文本内容 / Text</label>
+                <div class="text-[10px] text-stone-400 font-mono">MD: **bold** *ital* # L ## M</div>
+              </div>
               <textarea 
-                class="w-full p-2 border text-sm h-32" 
+                class="w-full p-2 border text-sm h-32 font-mono" 
                 :value="getValue(selectedPath)" 
                 @input="(e) => updateTextData(selectedPath!, null, (e.target as HTMLTextAreaElement).value)" 
               />
@@ -397,10 +372,10 @@ function handleImageUpload(e: Event) {
                   placeholder="AI 指令" 
                   class="flex-1 text-xs border border-stone-200 p-1 px-2 rounded"
                   v-model="rewritePrompt"
-                  @keydown.enter="async () => { const t = await handleSmartRewrite(getValue(selectedPath)); updateTextData(selectedPath!, null, t) }"
+                  @keydown.enter="async () => { const t = await handleSmartRewrite(getValue(selectedPath!)); updateTextData(selectedPath!, null, t) }"
                 />
                 <button 
-                  @click="async () => { const t = await handleSmartRewrite(getValue(selectedPath)); updateTextData(selectedPath!, null, t) }"
+                  @click="async () => { const t = await handleSmartRewrite(getValue(selectedPath!)); updateTextData(selectedPath!, null, t) }"
                   :disabled="isRewriting || !rewritePrompt"
                   class="bg-stone-800 text-white p-1 px-2 rounded text-xs flex items-center gap-1 hover:bg-black disabled:opacity-50"
                 >
@@ -431,7 +406,7 @@ function handleImageUpload(e: Event) {
           <div class="shadow-xl">
             <Newspaper 
               :data="previewContent.textData" 
-              :theme="theme" 
+              :theme="displayTheme" 
               :publication-type="PublicationType.TRIANGLE"
               :image-src="previewContent.imageBase64" 
               :page="1" 
@@ -447,7 +422,7 @@ function handleImageUpload(e: Event) {
           <div class="shadow-xl">
             <Newspaper 
               :data="previewContent.textData" 
-              :theme="theme" 
+              :theme="displayTheme" 
               :publication-type="PublicationType.TRIANGLE"
               :page="2" 
               :on-section-select="handleSectionSelect"

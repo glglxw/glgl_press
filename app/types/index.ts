@@ -17,35 +17,44 @@ export interface FrontPageData {
     newsSnippets: Array<{
         title: string;
         content: string;
+        scale?: number;
     }>;
     column1: {
         title: string;
         content: string;
+        scale?: number;
     };
     column2: {
         title: string;
         content: string;
+        scale?: number;
     };
     weirdNews: {
         title: string;
         content: string;
+        scale?: number;
     };
+    scale?: number; // For mainStory
 }
 
 export interface SecondPageData {
     editorial: {
         title: string;
         content: string;
+        scale?: number;
     };
     classifieds: Array<{
         title: string;
         content: string;
+        scale?: number;
     }>;
     culture: {
         title: string;
         content: string;
+        scale?: number;
     };
     horoscope: string;
+    scale?: number;
 }
 
 export interface NewsData {

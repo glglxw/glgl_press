@@ -1,31 +1,48 @@
 <script setup lang="ts">
-import { Download, Loader2, Newspaper as NewspaperIcon, Ghost } from 'lucide-vue-next'
+import { Download, Loader2, Newspaper as NewspaperIcon, Ghost, Archive, X, ChevronRight } from 'lucide-vue-next'
 import html2canvas from 'html2canvas'
 import { ThemeType, PublicationType, type GeneratedContent } from '~/types'
 
-const { getLatestIssue } = useIssues()
+const { getLatestIssue, getAllIssues } = useIssues()
 
 const loading = ref(true)
 const data = ref<GeneratedContent | null>(null)
+const allIssues = ref<GeneratedContent[]>([])
+const showArchives = ref(false)
 
 const page1Ref = ref<HTMLDivElement | null>(null)
 const page2Ref = ref<HTMLDivElement | null>(null)
 
 onMounted(async () => {
   try {
-    const latest = await getLatestIssue(PublicationType.DUSKVOL)
+    const [latest, issues] = await Promise.all([
+      getLatestIssue(PublicationType.DUSKVOL),
+      getAllIssues()
+    ])
+    
     if (latest) {
       data.value = latest
+    }
+    if (issues) {
+      // Sort issues by date descending if not already
+      allIssues.value = issues.filter(issue => issue.publicationType === PublicationType.DUSKVOL).sort((a, b) => 
+        new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime()
+      )
     }
   } finally {
     loading.value = false
   }
 })
 
-async function handleDownload(pageRef: Ref<HTMLDivElement | null>, pageNum: number) {
-  if (pageRef.value) {
+function handleSelectIssue(issue: GeneratedContent) {
+  data.value = issue
+  showArchives.value = false
+}
+
+async function handleDownload(element: HTMLDivElement | null, pageNum: number) {
+  if (element) {
     try {
-      const canvas = await html2canvas(pageRef.value, {
+      const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         backgroundColor: null,
@@ -64,6 +81,13 @@ async function handleDownload(pageRef: Ref<HTMLDivElement | null>, pageNum: numb
     <!-- Header Bar -->
     <div class="fixed top-0 left-0 right-0 h-16 bg-stone-800 shadow z-10 flex items-center justify-between px-8 text-stone-200">
       <div class="flex items-center gap-4">
+        <button 
+          @click="showArchives = !showArchives"
+          class="p-2 hover:bg-stone-700 rounded text-stone-400 hover:text-stone-200 transition-colors"
+          title="Open Archives"
+        >
+          <Archive class="w-5 h-5" />
+        </button>
         <NuxtLink to="/" class="font-black text-xl tracking-tighter uppercase text-stone-100 hover:text-white flex items-center gap-2">
           <Ghost class="w-5 h-5" /> The Duskvol Chronicle
         </NuxtLink>
@@ -117,5 +141,47 @@ async function handleDownload(pageRef: Ref<HTMLDivElement | null>, pageNum: numb
     >
       Press Room
     </NuxtLink>
+
+    <!-- Archives Drawer -->
+    <div 
+      v-if="showArchives" 
+      class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+      @click="showArchives = false"
+    ></div>
+    
+    <div 
+      class="fixed inset-y-0 left-0 w-80 bg-stone-900 border-r border-stone-800 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl flex flex-col"
+      :class="showArchives ? 'translate-x-0' : '-translate-x-full'"
+    >
+      <div class="p-6 border-b border-stone-800 flex items-center justify-between">
+        <h2 class="font-black uppercase tracking-widest text-stone-400 flex items-center gap-2">
+          <Archive class="w-4 h-4" /> Archives
+        </h2>
+        <button 
+          @click="showArchives = false"
+          class="text-stone-500 hover:text-stone-300"
+        >
+          <X class="w-5 h-5" />
+        </button>
+      </div>
+      
+      <div class="flex-1 overflow-y-auto p-4 space-y-2">
+        <button
+          v-for="issue in allIssues"
+          :key="issue.id"
+          @click="handleSelectIssue(issue)"
+          class="w-full text-left p-4 bg-stone-800/50 hover:bg-stone-800 border border-stone-800 hover:border-stone-700 rounded transition-all group"
+          :class="{ 'border-blue-500/50 bg-blue-900/10': data?.id === issue.id }"
+        >
+          <div class="flex justify-between items-start mb-2">
+             <span class="text-xs font-serif text-stone-500">{{ issue.textData.date }}</span>
+             <ChevronRight class="w-3 h-3 text-stone-600 group-hover:text-stone-400 transition-colors" />
+          </div>
+          <h3 class="font-bold text-stone-300 text-sm leading-tight group-hover:text-white transition-colors">
+            {{ issue.textData.frontPage.headline }}
+          </h3>
+        </button>
+      </div>
+    </div>
   </div>
 </template>

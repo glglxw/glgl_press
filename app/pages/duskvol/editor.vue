@@ -1,31 +1,35 @@
 <script setup lang="ts">
 import { 
   Loader2, Wand2, Save, Layout, Ghost, Upload, Undo2, 
-  MousePointerClick, ArrowLeft, Printer 
+  MousePointerClick, ArrowLeft, Printer, Sidebar 
 } from 'lucide-vue-next'
 import { ThemeType, PublicationType, type GeneratedContent, type NewsData } from '~/types'
 
-const router = useRouter()
-const { generateNewsContent, generateNewsImage, rewriteText, loading, loadingStep } = useGemini()
-const { saveIssue } = useIssues()
+const { 
+    topic, date, theme, previewContent, isPublishing, isSaving,
+    selectedPath, selectedLabel, isRewriting, rewritePrompt,
+    loading, loadingStep, allIssues, loadingIssues,
+    init, loadIssueList, createBlankTemplate, handleGenerate, 
+    handlePublish, handleSaveDraft, handleSelectIssue, getValue, 
+    updateTextData, handleSectionSelect, handleSmartRewrite, 
+    handleImageUpload, updateScale, getScale
+} = useNewsEditor(PublicationType.DUSKVOL)
 
-// Form State
-const topic = ref('工业区幽灵出没事件')
-const date = ref(new Date().toISOString().split('T')[0])
-const theme = ref<ThemeType>(ThemeType.NOIR) // Duskvol defaults to NOIR
+// UI specific ref for scale to bind to slider
+const currentScale = computed({
+    get: () => getScale(),
+    set: (val: number) => updateScale(val)
+})
 
-// Preview State
-const previewContent = ref<GeneratedContent | null>(null)
-const isPublishing = ref(false)
+const displayTheme = computed(() => theme.value || ThemeType.NOIR)
 
-// Selection State
-const selectedPath = ref<string | null>(null)
-const selectedLabel = ref('')
-const isRewriting = ref(false)
-const rewritePrompt = ref('')
+onMounted(async () => {
+    theme.value = ThemeType.NOIR
+    await init()
+})
 
-function createBlankTemplate(): NewsData {
-  return {
+function handleManualCreate() {
+    createBlankTemplate({
     date: date.value,
     location: 'Duskvol',
     frontPage: {
@@ -51,124 +55,7 @@ function createBlankTemplate(): NewsData {
       ],
       horoscope: 'Click to edit dark wisdom...'
     }
-  }
-}
-
-function handleManualCreate() {
-  const textData = createBlankTemplate()
-  previewContent.value = { textData, theme: theme.value, publicationType: PublicationType.DUSKVOL }
-  selectedPath.value = null
-}
-
-async function handleGenerate() {
-  const textData = await generateNewsContent(topic.value, date.value, theme.value, PublicationType.DUSKVOL)
-  if (!textData) {
-    alert("Generation failed. Please use manual creation below if needed.")
-    return
-  }
-  
-  previewContent.value = { textData, theme: theme.value, publicationType: PublicationType.DUSKVOL }
-  
-  const imageBase64 = await generateNewsImage(textData.frontPage.mainImagePrompt, theme.value, PublicationType.DUSKVOL)
-  if (imageBase64) {
-    previewContent.value = { ...previewContent.value!, imageBase64 }
-  }
-  
-  selectedPath.value = null
-}
-
-async function handlePublish() {
-  if (!previewContent.value) return
-  isPublishing.value = true
-  
-  try {
-    const result = await saveIssue(previewContent.value)
-    if (result) {
-      alert("Publication complete. The Chronicle awaits its readers.")
-      router.push('/duskvol')
-    } else {
-      alert("Publication failed. The void consumes our efforts.")
-    }
-  } finally {
-    isPublishing.value = false
-  }
-}
-
-async function handleLoadLatest() {
-  const { getLatestIssue } = useIssues()
-  const latest = await getLatestIssue(PublicationType.DUSKVOL)
-  
-  if (latest) {
-    previewContent.value = latest
-    theme.value = latest.theme || ThemeType.NOIR
-    if (latest.textData?.date) {
-      date.value = latest.textData.date
-    }
-    alert("Latest Chronicle loaded. Continue your work in the shadows.")
-  } else {
-    alert("No Chronicle found in the archives.")
-  }
-}
-
-function getValue(path: string): any {
-  if (!previewContent.value) return ''
-  const keys = path.split('.')
-  let current: any = previewContent.value.textData
-  for (const k of keys) {
-    if (current === undefined) return ''
-    current = current[k]
-  }
-  return current
-}
-
-function updateTextData(path: string, field: string | null, value: any) {
-  if (!previewContent.value) return
-  const newData = structuredClone(previewContent.value)
-  const keys = path.split('.')
-  if (field) keys.push(field)
-  
-  let current: any = newData.textData
-  for (let i = 0; i < keys.length - 1; i++) {
-    if (!current) return
-    current = current[keys[i]]
-  }
-  if (current) {
-    current[keys[keys.length - 1]] = value
-    previewContent.value = newData
-  }
-}
-
-function handleSectionSelect(path: string, label: string) {
-  if (!path) {
-    selectedPath.value = null
-    return
-  }
-  selectedPath.value = path
-  selectedLabel.value = label
-  rewritePrompt.value = ''
-}
-
-async function handleSmartRewrite(currentText: string): Promise<string> {
-  if (!currentText || !rewritePrompt.value) return currentText
-  isRewriting.value = true
-  try {
-    return await rewriteText(currentText, rewritePrompt.value)
-  } finally {
-    isRewriting.value = false
-  }
-}
-
-function handleImageUpload(e: Event) {
-  const file = (e.target as HTMLInputElement).files?.[0]
-  if (file) {
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      if (previewContent.value) {
-        previewContent.value = { ...previewContent.value, imageBase64: reader.result as string }
-      }
-    }
-    reader.readAsDataURL(file)
-  }
+  }, ThemeType.NOIR)
 }
 </script>
 
@@ -232,14 +119,32 @@ function handleImageUpload(e: Event) {
             </span>
           </button>
 
-          <button
-            @click="handleLoadLatest"
-            class="w-full py-2 text-blue-400 font-bold uppercase tracking-widest transition-all mt-2 border-2 border-blue-700 hover:bg-stone-700"
-          >
-            <span class="flex items-center justify-center gap-2">
-              <Ghost class="w-4 h-4" /> Load Latest
-            </span>
-          </button>
+          <div class="mt-4 border-t border-stone-700 pt-4">
+            <h3 class="text-xs font-bold uppercase text-stone-500 mb-2">Previous Chronicles</h3>
+            <div class="space-y-2 max-h-64 overflow-y-auto">
+                <button
+                    v-for="issue in allIssues"
+                    :key="issue.id"
+                    @click="handleSelectIssue(issue)"
+                    class="w-full text-left p-2 text-xs bg-stone-700 hover:bg-stone-600 border border-stone-600 rounded flex flex-col gap-1"
+                >
+                    <span class="font-bold text-stone-300">{{ issue.textData.frontPage.headline }}</span>
+                    <span class="text-[10px] text-stone-500 font-serif">{{ issue.textData.date }} • {{ issue.publishedAt ? new Date(issue.publishedAt).toLocaleTimeString() : 'Draft' }}</span>
+                </button>
+                 <div v-if="allIssues.length === 0" class="text-xs text-stone-500 italic p-2 text-center">
+                    No archives found.
+                </div>
+            </div>
+            
+             <button
+                @click="loadIssueList"
+                 class="w-full py-1 text-blue-400 font-bold uppercase tracking-widest transition-all mt-2 text-[10px] hover:bg-stone-700"
+            >
+                <span class="flex items-center justify-center gap-2">
+                <Ghost class="w-3 h-3" /> Refresh Archives
+                </span>
+            </button>
+          </div>
         </div>
 
         <!-- STATE 2: DASHBOARD -->
@@ -257,6 +162,15 @@ function handleImageUpload(e: Event) {
             >
               <Undo2 class="w-3 h-3" /> Reset / New
             </button>
+
+            <button
+              @click="handleSaveDraft"
+              :disabled="isSaving"
+              class="w-full py-3 text-stone-300 font-bold uppercase tracking-widest transition-all border border-stone-600 hover:bg-stone-700"
+            >
+                <span v-if="isSaving" class="flex items-center justify-center gap-2"><Loader2 class="animate-spin w-4 h-4" /> Saving...</span>
+                <span v-else class="flex items-center justify-center gap-2"><Save class="w-4 h-4" /> Save Draft</span>
+            </button>
             
             <button
               @click="handlePublish"
@@ -272,19 +186,47 @@ function handleImageUpload(e: Event) {
 
         <!-- STATE 3: EDITOR -->
         <div v-else class="space-y-4 animate-in slide-in-from-right-4 duration-300">
-          <button 
-            @click="selectedPath = null"
-            class="flex items-center gap-1 text-xs font-bold text-stone-500 hover:text-stone-300 mb-4"
-          >
-            <ArrowLeft class="w-3 h-3" /> Back to Menu
-          </button>
+            <div class="flex justify-between items-center mb-4">
+                <button 
+                    @click="selectedPath = null"
+                    class="flex items-center gap-1 text-xs font-bold text-stone-500 hover:text-stone-300"
+                >
+                    <ArrowLeft class="w-3 h-3" /> Back
+                </button>
+                 <button
+                    @click="handleSaveDraft"
+                    :disabled="isSaving"
+                    class="flex items-center gap-1 text-xs font-bold text-stone-500 hover:text-stone-300 border border-stone-700 px-2 py-1 rounded"
+                    >
+                    <Save v-if="!isSaving" class="w-3 h-3" />
+                    <Loader2 v-else class="w-3 h-3 animate-spin" />
+                    Save
+                </button>
+            </div>
 
           <div class="flex items-center gap-2 mb-4 pb-2 border-b border-stone-700">
             <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-            <h3 class="font-black uppercase tracking-tight text-lg text-blue-400">
-              Editing: {{ selectedLabel }}
+            <h3 class="font-black uppercase tracking-tight text-lg text-blue-400 truncate">
+              {{ selectedLabel }}
             </h3>
           </div>
+
+          <!-- Typography Control -->
+           <div class="bg-stone-700/30 p-3 rounded border border-stone-700">
+                <div class="flex justify-between items-center mb-1">
+                    <label class="text-[10px] font-bold uppercase text-stone-500">Layout Weight: {{ currentScale.toFixed(1) }}</label>
+                    <button @click="currentScale = 1" class="text-[10px] text-blue-400 hover:text-blue-300" title="Reset Size">Reset</button>
+                </div>
+                <input 
+                    type="range" 
+                    v-model.number="currentScale" 
+                    min="0.5" 
+                    max="2.0" 
+                    step="0.1"
+                    class="w-full h-1 bg-stone-600 rounded-lg appearance-none cursor-pointer range-sm"
+                >
+            </div>
+
 
           <!-- Date Editor -->
           <div v-if="selectedPath === 'date'" class="space-y-4">
@@ -306,14 +248,14 @@ function handleImageUpload(e: Event) {
             </label>
           </div>
 
-          <!-- Object Editor -->
+            <!-- Object Editor -->
           <template v-else>
-            <div v-if="typeof getValue(selectedPath) === 'object'" class="space-y-6">
-              <div v-if="getValue(selectedPath)?.title !== undefined" class="space-y-1">
+            <div v-if="typeof getValue(selectedPath!) === 'object'" class="space-y-6">
+              <div v-if="getValue(selectedPath!)?.title !== undefined" class="space-y-1">
                 <label class="block text-xs font-bold uppercase text-stone-500">Title</label>
                 <input 
                   class="w-full p-2 border border-stone-600 bg-stone-700 text-sm font-bold text-stone-100" 
-                  :value="getValue(selectedPath).title" 
+                  :value="getValue(selectedPath!).title" 
                   @input="(e) => updateTextData(selectedPath!, 'title', (e.target as HTMLInputElement).value)" 
                 />
                 <div class="flex gap-2 mt-1">
@@ -322,10 +264,10 @@ function handleImageUpload(e: Event) {
                     placeholder="AI instruction..." 
                     class="flex-1 text-xs border border-stone-600 bg-stone-700 p-1 px-2 rounded text-stone-200"
                     v-model="rewritePrompt"
-                    @keydown.enter="async () => { const t = await handleSmartRewrite(getValue(selectedPath).title); updateTextData(selectedPath!, 'title', t) }"
+                    @keydown.enter="async () => { const t = await handleSmartRewrite(getValue(selectedPath!).title); updateTextData(selectedPath!, 'title', t) }"
                   />
                   <button 
-                    @click="async () => { const t = await handleSmartRewrite(getValue(selectedPath).title); updateTextData(selectedPath!, 'title', t) }"
+                    @click="async () => { const t = await handleSmartRewrite(getValue(selectedPath!).title); updateTextData(selectedPath!, 'title', t) }"
                     :disabled="isRewriting || !rewritePrompt"
                     class="bg-stone-600 text-white p-1 px-2 rounded text-xs flex items-center gap-1 hover:bg-stone-500 disabled:opacity-50"
                   >
@@ -334,11 +276,14 @@ function handleImageUpload(e: Event) {
                   </button>
                 </div>
               </div>
-              <div v-if="getValue(selectedPath)?.content !== undefined" class="space-y-1">
-                <label class="block text-xs font-bold uppercase text-stone-500">Content</label>
+              <div v-if="getValue(selectedPath!)?.content !== undefined" class="space-y-1">
+                <div class="flex justify-between items-baseline">
+                  <label class="block text-xs font-bold uppercase text-stone-500">Content</label>
+                  <div class="text-[10px] text-stone-500 font-mono">Markdown: **bold** *italic* # Large ## Med</div>
+                </div>
                 <textarea 
-                  class="w-full p-2 border border-stone-600 bg-stone-700 text-sm h-48 text-stone-100" 
-                  :value="getValue(selectedPath).content" 
+                  class="w-full p-2 border border-stone-600 bg-stone-700 text-sm h-48 text-stone-100 font-mono" 
+                  :value="getValue(selectedPath!).content" 
                   @input="(e) => updateTextData(selectedPath!, 'content', (e.target as HTMLTextAreaElement).value)" 
                 />
                 <div class="flex gap-2 mt-1">
@@ -347,10 +292,10 @@ function handleImageUpload(e: Event) {
                     placeholder="AI instruction..." 
                     class="flex-1 text-xs border border-stone-600 bg-stone-700 p-1 px-2 rounded text-stone-200"
                     v-model="rewritePrompt"
-                    @keydown.enter="async () => { const t = await handleSmartRewrite(getValue(selectedPath).content); updateTextData(selectedPath!, 'content', t) }"
+                    @keydown.enter="async () => { const t = await handleSmartRewrite(getValue(selectedPath!).content); updateTextData(selectedPath!, 'content', t) }"
                   />
                   <button 
-                    @click="async () => { const t = await handleSmartRewrite(getValue(selectedPath).content); updateTextData(selectedPath!, 'content', t) }"
+                    @click="async () => { const t = await handleSmartRewrite(getValue(selectedPath!).content); updateTextData(selectedPath!, 'content', t) }"
                     :disabled="isRewriting || !rewritePrompt"
                     class="bg-stone-600 text-white p-1 px-2 rounded text-xs flex items-center gap-1 hover:bg-stone-500 disabled:opacity-50"
                   >
@@ -363,10 +308,13 @@ function handleImageUpload(e: Event) {
             
             <!-- String Editor -->
             <div v-else class="space-y-1">
-              <label class="block text-xs font-bold uppercase text-stone-500">Text Content</label>
+              <div class="flex justify-between items-baseline">
+                <label class="block text-xs font-bold uppercase text-stone-500">Text Content</label>
+                <div class="text-[10px] text-stone-500 font-mono">Markdown: **bold** *italic* # Large ## Med</div>
+              </div>
               <textarea 
-                class="w-full p-2 border border-stone-600 bg-stone-700 text-sm h-32 text-stone-100" 
-                :value="getValue(selectedPath)" 
+                class="w-full p-2 border border-stone-600 bg-stone-700 text-sm h-32 text-stone-100 font-mono" 
+                :value="getValue(selectedPath!)" 
                 @input="(e) => updateTextData(selectedPath!, null, (e.target as HTMLTextAreaElement).value)" 
               />
               <div class="flex gap-2 mt-1">
@@ -375,10 +323,10 @@ function handleImageUpload(e: Event) {
                   placeholder="AI instruction..." 
                   class="flex-1 text-xs border border-stone-600 bg-stone-700 p-1 px-2 rounded text-stone-200"
                   v-model="rewritePrompt"
-                  @keydown.enter="async () => { const t = await handleSmartRewrite(getValue(selectedPath)); updateTextData(selectedPath!, null, t) }"
+                  @keydown.enter="async () => { const t = await handleSmartRewrite(getValue(selectedPath!)); updateTextData(selectedPath!, null, t) }"
                 />
                 <button 
-                  @click="async () => { const t = await handleSmartRewrite(getValue(selectedPath)); updateTextData(selectedPath!, null, t) }"
+                  @click="async () => { const t = await handleSmartRewrite(getValue(selectedPath!)); updateTextData(selectedPath!, null, t) }"
                   :disabled="isRewriting || !rewritePrompt"
                   class="bg-stone-600 text-white p-1 px-2 rounded text-xs flex items-center gap-1 hover:bg-stone-500 disabled:opacity-50"
                 >
@@ -390,7 +338,7 @@ function handleImageUpload(e: Event) {
           </template>
 
           <div class="p-3 bg-stone-700/50 text-[10px] text-stone-500 mt-8 rounded border border-stone-700">
-            Tip: Changes are reflected in real-time. Click another section to switch editing targets.
+            Tip: Changes are reflected in real-time. Use the slider to adjust sizing if text overflows.
           </div>
         </div>
       </div>
@@ -407,9 +355,9 @@ function handleImageUpload(e: Event) {
         <div class="relative flex gap-1 scale-[0.35] sm:scale-[0.45] lg:scale-[0.55] xl:scale-[0.65] origin-center shadow-2xl">
           <!-- Page 1 (Left) -->
           <div class="shadow-xl">
-            <Newspaper 
+              <Newspaper 
               :data="previewContent.textData" 
-              :theme="theme" 
+              :theme="displayTheme" 
               :publication-type="PublicationType.DUSKVOL"
               :image-src="previewContent.imageBase64" 
               :page="1" 
@@ -425,7 +373,7 @@ function handleImageUpload(e: Event) {
           <div class="shadow-xl">
             <Newspaper 
               :data="previewContent.textData" 
-              :theme="theme" 
+              :theme="displayTheme" 
               :publication-type="PublicationType.DUSKVOL"
               :page="2" 
               :on-section-select="handleSectionSelect"
