@@ -91,8 +91,12 @@ const newsSchema = {
 }
 
 export default defineEventHandler(async (event) => {
+    const startTime = Date.now()
+    console.log('[API /generate/content] Request received')
+
     const config = useRuntimeConfig()
     if (!config.geminiApiKey) {
+        console.error('[API /generate/content] API Key not configured')
         throw createError({ statusCode: 500, message: 'API Key not configured' })
     }
 
@@ -102,6 +106,13 @@ export default defineEventHandler(async (event) => {
         theme: string
         publication: PublicationType
     }>(event)
+
+    console.log('[API /generate/content] Params:', {
+        topic: body.topic?.substring(0, 50) + '...',
+        date: body.date,
+        theme: body.theme,
+        publication: body.publication
+    })
 
     const ai = new GoogleGenAI({ apiKey: config.geminiApiKey })
 
@@ -140,6 +151,7 @@ export default defineEventHandler(async (event) => {
   `
 
     try {
+        console.log('[API /generate/content] Calling Gemini API...')
         const response = await ai.models.generateContent({
             model: 'gemini-3-flash-preview',
             contents: prompt,
@@ -149,15 +161,27 @@ export default defineEventHandler(async (event) => {
             },
         })
 
-        const text = response.text
-        if (!text) throw createError({ statusCode: 500, message: 'No text returned from Gemini' })
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(2)
+        console.log(`[API /generate/content] Gemini API responded in ${elapsed}s`)
 
+        const text = response.text
+        if (!text) {
+            console.error('[API /generate/content] No text returned from Gemini')
+            throw createError({ statusCode: 500, message: 'No text returned from Gemini' })
+        }
+
+        console.log('[API /generate/content] Parsing JSON response, length:', text.length)
         const data = JSON.parse(text) as NewsData
         data.date = body.date
 
+        const totalTime = ((Date.now() - startTime) / 1000).toFixed(2)
+        console.log(`[API /generate/content] Success! Total time: ${totalTime}s, Headline: ${data.frontPage?.headline}`)
+
         return { success: true, data }
     } catch (error: any) {
-        console.error("Error generating text:", error)
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(2)
+        console.error(`[API /generate/content] Error after ${elapsed}s:`, error.message || error)
         throw createError({ statusCode: 500, message: error.message || 'Failed to generate content' })
     }
 })
+

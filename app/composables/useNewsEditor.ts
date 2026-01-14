@@ -208,10 +208,23 @@ export function useNewsEditor(publicationType: PublicationType) {
     }
 
     async function handleSmartRewrite(currentText: string) {
-        if (!currentText || !rewritePrompt.value) return currentText
+        console.log('[NewsEditor] handleSmartRewrite called:', {
+            currentText: currentText?.substring(0, 50),
+            rewritePrompt: rewritePrompt.value
+        })
+
+        if (!currentText || !rewritePrompt.value) {
+            console.log('[NewsEditor] handleSmartRewrite early return - missing text or prompt')
+            return currentText
+        }
+
         isRewriting.value = true
+        console.log('[NewsEditor] Starting rewrite...')
+
         try {
-            return await rewriteText(currentText, rewritePrompt.value)
+            const result = await rewriteText(currentText, rewritePrompt.value)
+            console.log('[NewsEditor] Rewrite complete, result length:', result?.length)
+            return result
         } finally {
             isRewriting.value = false
         }

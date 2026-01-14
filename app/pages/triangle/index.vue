@@ -52,26 +52,24 @@ async function handleDownload(type: 'page1' | 'page2' | 'all') {
   try {
     // create a temporary container
     const container = document.createElement('div')
-    container.style.position = 'absolute'
-    container.style.left = '-9999px'
+    container.style.position = 'fixed'
+    container.style.left = '0'
     container.style.top = '0'
-    // Ensure the container has a width that fits the content to avoid wrapping
+    container.style.zIndex = '-1'
+    container.style.opacity = '0.01'
+    container.style.pointerEvents = 'none'
     container.style.width = type === 'all' ? '1600px' : '800px'
-    // Add white background explicitly to ensure consistency
     container.style.backgroundColor = '#ffffff'
     document.body.appendChild(container)
 
     // Helper to clone and prepare element
     const appendClone = (ref: HTMLDivElement | null) => {
       if (!ref) return
-      // We need to query the actual newspaper content div
-      // Note: we use querySelector to find the newspaper component root
       const newspaperDiv = ref.querySelector('[class*="w-[794px]"]') as HTMLElement
       if (newspaperDiv) {
         const clone = newspaperDiv.cloneNode(true) as HTMLElement
         clone.style.margin = '0'
         clone.style.transform = 'none'
-        // Ensure fonts rendering is consistent
         clone.style.fontFeatureSettings = '"liga" 0'
         container.appendChild(clone)
         return true
@@ -83,15 +81,12 @@ async function handleDownload(type: 'page1' | 'page2' | 'all') {
       appendClone(page1Ref.value)
     }
 
-    // Add gap for combined
     if (type === 'all') {
       const gap = document.createElement('div')
       gap.style.width = '20px'
-      gap.style.height = '1px' // spacer
+      gap.style.height = '1px'
       gap.style.display = 'inline-block'
       container.appendChild(gap)
-
-      // Make container flex to sit side-by-side
       container.style.display = 'flex'
       container.style.gap = '0'
     }
@@ -100,13 +95,15 @@ async function handleDownload(type: 'page1' | 'page2' | 'all') {
       appendClone(page2Ref.value)
     }
 
-    // Slight delay to ensure DOM render (fonts, images)
     await new Promise(resolve => setTimeout(resolve, 500))
+
+    // Reset opacity to 1 for capture
+    container.style.opacity = '1'
 
     const dataUrl = await toPng(container, {
       quality: 1.0,
-      pixelRatio: 2, // High resolution
-      backgroundColor: '#ffffff' // Ensure background is filled
+      pixelRatio: 2,
+      backgroundColor: '#ffffff'
     })
 
     const link = document.createElement('a')

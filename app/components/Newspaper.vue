@@ -150,7 +150,7 @@ function renderMdInline(text: string) {
       </header>
 
       <!-- Page 1 Content -->
-      <div v-if="page === 1" class="flex-1 p-8 flex flex-col gap-6">
+      <div v-if="page === 1" class="flex-1 p-8 flex flex-col gap-6 overflow-hidden">
         <div class="grid grid-cols-12 gap-6 pb-6 border-b-2" :style="{ borderColor: colors.secondary }">
           <div class="col-span-7 flex flex-col gap-4">
             <div class="flex items-center gap-2 mb-2">
@@ -255,7 +255,7 @@ function renderMdInline(text: string) {
       </div>
 
       <!-- Page 2 Content -->
-      <div v-if="page === 2" class="flex-1 p-8 grid grid-cols-12 gap-8">
+      <div v-if="page === 2" class="flex-1 p-8 grid grid-cols-12 gap-8 overflow-hidden">
         <div class="col-span-8 flex flex-col gap-8">
           <div
             class="border-b-2 pb-6 cursor-pointer"
