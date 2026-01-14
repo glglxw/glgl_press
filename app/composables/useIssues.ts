@@ -14,17 +14,19 @@ export function useIssues() {
 
     async function saveIssue(content: GeneratedContent): Promise<GeneratedContent | null> {
         try {
+            console.log('[useIssues] Attempting to save issue:', content)
             const response = await $fetch<{ success: boolean; issue: GeneratedContent }>('/api/issues', {
                 method: 'POST',
                 body: content
             })
 
+            console.log('[useIssues] Save response:', response)
             if (response.success) {
                 return response.issue
             }
             return null
         } catch (e) {
-            console.error('Failed to save issue:', e)
+            console.error('[useIssues] Failed to save issue:', e)
             return null
         }
     }

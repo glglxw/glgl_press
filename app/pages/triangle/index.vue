@@ -83,10 +83,11 @@ async function handleDownload(pageRef: Ref<HTMLDivElement | null>, pageNum: numb
       </div>
     </div>
 
-    <!-- Newspaper Pages -->
-    <div class="pt-20 flex flex-col items-center gap-12 pb-20">
-      <div class="scale-[0.5] sm:scale-[0.7] lg:scale-[0.9] xl:scale-100 origin-top shadow-2xl transition-all">
-        <div ref="page1Ref">
+    <!-- Newspaper Pages Side-by-Side -->
+    <div class="pt-20 pb-20 flex items-center justify-center">
+      <div class="relative flex gap-1 scale-[0.3] sm:scale-[0.4] md:scale-[0.5] lg:scale-[0.6] xl:scale-[0.7] origin-center shadow-2xl transition-all">
+        <!-- Page 1 (Left) -->
+        <div ref="page1Ref" class="shadow-xl">
           <Newspaper 
             :data="data.textData" 
             :theme="theme" 
@@ -95,9 +96,12 @@ async function handleDownload(pageRef: Ref<HTMLDivElement | null>, pageNum: numb
             :page="1" 
           />
         </div>
-      </div>
-      <div class="scale-[0.5] sm:scale-[0.7] lg:scale-[0.9] xl:scale-100 origin-top shadow-2xl transition-all">
-        <div ref="page2Ref">
+        
+        <!-- Center fold effect -->
+        <div class="w-2 bg-gradient-to-r from-stone-400 via-stone-300 to-stone-400 shadow-inner"></div>
+        
+        <!-- Page 2 (Right) -->
+        <div ref="page2Ref" class="shadow-xl">
           <Newspaper 
             :data="data.textData" 
             :theme="theme" 

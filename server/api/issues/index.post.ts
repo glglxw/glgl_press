@@ -37,6 +37,9 @@ async function writeIssues(issues: GeneratedContent[]) {
 export default defineEventHandler(async (event) => {
     const body = await readBody<GeneratedContent>(event)
 
+    console.log('[POST /api/issues] Received request to save issue')
+    console.log('[POST /api/issues] Body:', JSON.stringify(body, null, 2))
+
     // Generate unique ID
     const id = `issue-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
     const newIssue: GeneratedContent = {
@@ -46,8 +49,13 @@ export default defineEventHandler(async (event) => {
     }
 
     const issues = await readIssues()
+    console.log('[POST /api/issues] Current issues count:', issues.length)
+
     issues.push(newIssue)
     await writeIssues(issues)
+
+    console.log('[POST /api/issues] Saved! New issues count:', issues.length)
+    console.log('[POST /api/issues] Data file path:', DATA_FILE)
 
     return { success: true, issue: newIssue }
 })

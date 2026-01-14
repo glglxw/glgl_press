@@ -3,7 +3,7 @@ import {
   Loader2, Wand2, Save, Layout, Ghost, Upload, Undo2, 
   MousePointerClick, ArrowLeft, Printer 
 } from 'lucide-vue-next'
-import { ThemeType, PublicationType, type GeneratedContent } from '~/types'
+import { ThemeType, PublicationType, type GeneratedContent, type NewsData } from '~/types'
 
 const router = useRouter()
 const { generateNewsContent, generateNewsImage, rewriteText, loading, loadingStep } = useGemini()
@@ -24,10 +24,46 @@ const selectedLabel = ref('')
 const isRewriting = ref(false)
 const rewritePrompt = ref('')
 
+function createBlankTemplate(): NewsData {
+  return {
+    date: date.value,
+    location: 'Duskvol',
+    frontPage: {
+      headline: 'Click to Edit Headline',
+      mainStory: 'Click to edit main story content...',
+      mainImagePrompt: '',
+      newsSnippets: [
+        { title: 'Whisper 1', content: 'Click to edit whisper...' },
+        { title: 'Whisper 2', content: 'Click to edit whisper...' },
+        { title: 'Whisper 3', content: 'Click to edit whisper...' }
+      ],
+      column1: { title: 'Column 1', content: 'Click to edit column content...' },
+      column2: { title: 'Column 2', content: 'Click to edit column content...' },
+      weirdNews: { title: 'Dark News', content: 'Click to edit dark news...' }
+    },
+    secondPage: {
+      editorial: { title: 'Editorial Title', content: 'Click to edit editorial...' },
+      culture: { title: 'Culture', content: 'Click to edit culture section...' },
+      classifieds: [
+        { title: 'Classified 1', content: 'Click to edit...' },
+        { title: 'Classified 2', content: 'Click to edit...' },
+        { title: 'Classified 3', content: 'Click to edit...' }
+      ],
+      horoscope: 'Click to edit dark wisdom...'
+    }
+  }
+}
+
+function handleManualCreate() {
+  const textData = createBlankTemplate()
+  previewContent.value = { textData, theme: theme.value, publicationType: PublicationType.DUSKVOL }
+  selectedPath.value = null
+}
+
 async function handleGenerate() {
   const textData = await generateNewsContent(topic.value, date.value, theme.value, PublicationType.DUSKVOL)
   if (!textData) {
-    alert("生成失败，请重试。")
+    alert("Generation failed. Please use manual creation below if needed.")
     return
   }
   
@@ -58,6 +94,22 @@ async function handlePublish() {
   }
 }
 
+async function handleLoadLatest() {
+  const { getLatestIssue } = useIssues()
+  const latest = await getLatestIssue(PublicationType.DUSKVOL)
+  
+  if (latest) {
+    previewContent.value = latest
+    theme.value = latest.theme || ThemeType.NOIR
+    if (latest.textData?.date) {
+      date.value = latest.textData.date
+    }
+    alert("Latest Chronicle loaded. Continue your work in the shadows.")
+  } else {
+    alert("No Chronicle found in the archives.")
+  }
+}
+
 function getValue(path: string): any {
   if (!previewContent.value) return ''
   const keys = path.split('.')
@@ -77,10 +129,13 @@ function updateTextData(path: string, field: string | null, value: any) {
   
   let current: any = newData.textData
   for (let i = 0; i < keys.length - 1; i++) {
+    if (!current) return
     current = current[keys[i]]
   }
-  current[keys[keys.length - 1]] = value
-  previewContent.value = newData
+  if (current) {
+    current[keys[keys.length - 1]] = value
+    previewContent.value = newData
+  }
 }
 
 function handleSectionSelect(path: string, label: string) {
@@ -164,7 +219,25 @@ function handleImageUpload(e: Event) {
               <Loader2 class="animate-spin w-4 h-4" /> {{ loadingStep || 'Summoning spirits...' }}
             </span>
             <span v-else class="flex items-center justify-center gap-2">
-              <Wand2 class="w-4 h-4" /> Compose Chronicle
+              <Wand2 class="w-4 h-4" /> AI Compose Chronicle
+            </span>
+          </button>
+
+          <button
+            @click="handleManualCreate"
+            class="w-full py-2 text-stone-400 font-bold uppercase tracking-widest transition-all mt-2 border-2 border-stone-600 hover:bg-stone-700"
+          >
+            <span class="flex items-center justify-center gap-2">
+              <Printer class="w-4 h-4" /> Manual Creation
+            </span>
+          </button>
+
+          <button
+            @click="handleLoadLatest"
+            class="w-full py-2 text-blue-400 font-bold uppercase tracking-widest transition-all mt-2 border-2 border-blue-700 hover:bg-stone-700"
+          >
+            <span class="flex items-center justify-center gap-2">
+              <Ghost class="w-4 h-4" /> Load Latest
             </span>
           </button>
         </div>
@@ -324,32 +397,41 @@ function handleImageUpload(e: Event) {
     </div>
 
     <!-- Preview Area -->
-    <div class="flex-1 bg-stone-950 p-8 overflow-auto flex flex-col items-center gap-8" @click="selectedPath = null">
+    <div class="flex-1 bg-stone-950 p-8 overflow-auto flex flex-col items-center justify-center" @click="selectedPath = null">
       <div v-if="!previewContent" class="flex-1 flex flex-col items-center justify-center text-stone-600 gap-4">
         <Ghost class="w-16 h-16 opacity-20" />
         <p class="font-serif italic">The printing press awaits...</p>
       </div>
       <template v-else>
-        <div class="scale-[0.5] sm:scale-[0.6] lg:scale-[0.7] xl:scale-[0.8] origin-top shadow-xl transition-all duration-300">
-          <Newspaper 
-            :data="previewContent.textData" 
-            :theme="theme" 
-            :publication-type="PublicationType.DUSKVOL"
-            :image-src="previewContent.imageBase64" 
-            :page="1" 
-            :on-section-select="handleSectionSelect"
-            :selected-section-id="selectedPath"
-          />
-        </div>
-        <div class="scale-[0.5] sm:scale-[0.6] lg:scale-[0.7] xl:scale-[0.8] origin-top shadow-xl transition-all duration-300">
-          <Newspaper 
-            :data="previewContent.textData" 
-            :theme="theme" 
-            :publication-type="PublicationType.DUSKVOL"
-            :page="2" 
-            :on-section-select="handleSectionSelect"
-            :selected-section-id="selectedPath"
-          />
+        <!-- Side-by-side newspaper layout with center fold -->
+        <div class="relative flex gap-1 scale-[0.35] sm:scale-[0.45] lg:scale-[0.55] xl:scale-[0.65] origin-center shadow-2xl">
+          <!-- Page 1 (Left) -->
+          <div class="shadow-xl">
+            <Newspaper 
+              :data="previewContent.textData" 
+              :theme="theme" 
+              :publication-type="PublicationType.DUSKVOL"
+              :image-src="previewContent.imageBase64" 
+              :page="1" 
+              :on-section-select="handleSectionSelect"
+              :selected-section-id="selectedPath"
+            />
+          </div>
+          
+          <!-- Center fold effect -->
+          <div class="w-2 bg-gradient-to-r from-stone-700 via-stone-800 to-stone-700 shadow-inner"></div>
+          
+          <!-- Page 2 (Right) -->
+          <div class="shadow-xl">
+            <Newspaper 
+              :data="previewContent.textData" 
+              :theme="theme" 
+              :publication-type="PublicationType.DUSKVOL"
+              :page="2" 
+              :on-section-select="handleSectionSelect"
+              :selected-section-id="selectedPath"
+            />
+          </div>
         </div>
       </template>
     </div>
