@@ -117,38 +117,74 @@ export default defineEventHandler(async (event) => {
     const ai = new GoogleGenAI({ apiKey: config.geminiApiKey })
 
     const isDuskvol = body.publication === 'DUSKVOL'
-    const paperName = isDuskvol ? "The Duskvol Chronicle (多斯科沃公报)" : "Triangle Daily (三角日报)"
-    const context = isDuskvol
-        ? "You are the editor of a grim, industrial-fantasy newspaper in a city of eternal night and ghosts."
-        : "You are the editor-in-chief of a stylish, modern avant-garde newspaper."
 
-    const prompt = `
-    ${context}
-    Newspaper Name: "${paperName}"
-    
-    Generate a **TWO-PAGE** newspaper issue content based on the Topic: "${body.topic}".
-    The Date is: "${body.date}".
-    The Visual Theme is: "${body.theme}".
-    
-    IMPORTANT: All generated text (headlines, stories, locations, titles) MUST BE IN SIMPLIFIED CHINESE (简体中文).
-    
-    Page 1 content:
-    - Main headline and story (Make it substantive, ~250-300 words).
-    - Short snippets and columns (Make them detailed).
-    - Weird news ${isDuskvol ? "(Focus on ghosts, electroplasm, or crime)" : "(General weirdness)"}.
-    - Image prompt (in ENGLISH).
-    
-    Page 2 content:
-    - Editorial (Opinion, ~300 words).
-    - Classifieds (Funny/Surreal ads ${isDuskvol ? "selling spirits, lightning oil, etc." : ""}).
-    - Culture section (Arts review, ~200 words).
-    - Horoscope/Wisdom.
-    
-    The tone should be ${isDuskvol ? "cynical, atmospheric, shadowy" : "professional, geometric, sharp"}.
-    
-    Crucially, for 'mainImagePrompt', write it in ENGLISH. Describe a scene fitting the publication's vibe.
-    ${isDuskvol ? "Focus on fog, gaslamps, industrial decay, shadows, Victorian era aesthetic." : "Focus on geometric shapes, clean lines, high contrast."}
-  `
+    // Completely separate prompts for each publication
+    let prompt: string
+
+    if (isDuskvol) {
+        // ===== DUSKVOL CHRONICLE PROMPT =====
+        prompt = `
+You are the cynical, world-weary editor of "The Duskvol Chronicle (多斯科沃公报)", a grim newspaper in a city of eternal night, industrial decay, and restless ghosts.
+
+Generate a **TWO-PAGE** newspaper based on Topic: "${body.topic}"
+Date: "${body.date}"
+Visual Theme: "${body.theme}"
+
+IMPORTANT: All text MUST BE IN SIMPLIFIED CHINESE (简体中文), except mainImagePrompt.
+
+**TONE & STYLE:**
+- Cynical, atmospheric, shadowy
+- Victorian-industrial era language
+- References to ghosts, electroplasm, leviathan blood, and crime
+- Dark humor and fatalism
+
+**PAGE 1 - FRONT PAGE:**
+1. **Headline & Main Story (~300 words):** Report on "${body.topic}" with grim atmosphere. Include references to the Spirit Wardens, Bluecoats, or criminal gangs if relevant.
+2. **News Snippets (3 items):** Brief reports on ghost sightings, industrial accidents, or gang violence.
+3. **Column 1 - "The Gaslight Review":** Commentary on Duskvol society or philosophy.
+4. **Column 2 - "Market Watch":** Prices of electroplasm, leviathan oil, or black market goods.
+5. **Weird News:** Strange occurrences - possessed objects, temporal anomalies, cultist activities.
+6. **mainImagePrompt (ENGLISH):** Describe a scene with fog, gaslamps, industrial decay, Victorian aesthetic, shadows.
+
+**PAGE 2 - INNER PAGE:**
+1. **Editorial (~300 words):** Opinion piece with dark philosophical bent.
+2. **Classifieds (4-5 ads):** Sell spirits, haunted items, mercenary services, forbidden artifacts.
+3. **Culture Section (~200 words):** Review of underground theater, spirit seances, or criminal entertainment.
+4. **Horoscope:** Dark prophecy or ominous wisdom for the day.
+`
+    } else {
+        // ===== TRIANGLE DAILY PROMPT =====
+        prompt = `
+You are the Lead Reality Architect and Editor-in-Chief of "Triangle Daily (三角日报)", the premier corporate publication of the Triangle Agency. Your mission is to curate reality, normalize anomalies through corporate euphemisms, and present a sharp, geometric worldview.
+
+Generate a **TWO-PAGE** avant-garde corporate newspaper based on Topic: "${body.topic}"
+Date: "${body.date}"
+Visual Theme: "${body.theme}" (Interpret through Brutalist design and geometric precision)
+
+IMPORTANT: All text MUST BE IN SIMPLIFIED CHINESE (简体中文), except mainImagePrompt.
+
+**TONE & STYLE:**
+- Clinical, precise, yet elegantly bureaucratic
+- Normalize the abnormal: Call chaos "Unscheduled Restructuring", monsters "Geometric Fluctuations", disasters "Reality Adjustments"
+- Geometric fetishism: Reference triangles, angles, lines, intersections as metaphors for order
+- Slightly threatening but polite corporate speak
+- Never panic, always maintain composure
+
+**PAGE 1 - THE REALITY ANCHOR:**
+1. **Headline & Cover Story (~300 words):** Report on "${body.topic}" spun into a positive corporate narrative or "necessary Reality Adjustment." Emphasize efficiency, structure, and Agency benevolence.
+2. **"Minor Fluctuations" (News Snippets, 3 items):** Strange phenomena (time loops, floating objects, memory leaks) framed as mundane infrastructure updates.
+3. **"Angle of View" (Column 1):** Philosophically geometric column about maintaining focus and ignoring "unauthorized thoughts."
+4. **"Structural Integrity Report" (Column 2):** Status updates on reality stability in various sectors.
+5. **"Unclassified Observations" (Weird News):** Bizarre events described with clinical detachment and corporate euphemisms.
+6. **mainImagePrompt (ENGLISH):** Create prompt for high-contrast, minimalist illustration. Keywords: "Corporate Memphis meets Lovecraftian geometry", "Flat vector art", "Sharp angles", "Limited color palette", "Abstract representation of ${body.topic}".
+
+**PAGE 2 - THE ECHO CHAMBER:**
+1. **"From The Management" (Editorial, ~300 words):** Reinforce importance of "${body.topic}" for global stability. Use slightly threatening corporate speak.
+2. **"The Void Market" (Classifieds, 4-5 ads):** Surreal services like "Selling unused Tuesday afternoons", "Memory erasure - 50% off", "Hiring: Non-Euclidean Architect", "Lost: My concept of linear time".
+3. **"Form & Function" (Culture, ~200 words):** Review of non-existent art exhibit or "state of mind" based on "structural integrity" and "clean lines."
+4. **"Productivity Forecast" (Horoscope):** Use Geometric Shapes instead of zodiac (e.g., "Those aligned with The Isosceles..."). Give advice on work efficiency and avoiding "unauthorized thoughts."
+`
+    }
 
     try {
         console.log('[API /generate/content] Calling Gemini API...')
