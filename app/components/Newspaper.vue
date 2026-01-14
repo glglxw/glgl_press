@@ -173,7 +173,7 @@ function renderMdInline(text: string) {
               :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('frontPage.mainStory') }"
               @click="(e) => handleSelect('frontPage.mainStory', 'Main Story', e)"
             >
-              <div class="text-sm font-serif text-justify leading-snug opacity-90 whitespace-pre-wrap">
+              <div class="text-sm font-serif text-justify leading-snug opacity-90 whitespace-pre-wrap line-clamp-[12]">
                 <span class="font-bold text-base float-left mr-2 leading-none" :style="{ color: colors.primary }">{{ data.location }} —</span>
                 {{ data.frontPage.mainStory }}
               </div>
@@ -199,13 +199,13 @@ function renderMdInline(text: string) {
         </div>
 
         <div class="grid grid-cols-2 gap-8 flex-1">
-          <div class="flex flex-col gap-6 border-r pr-6" :style="{ borderColor: colors.secondary }">
+          <div class="flex flex-col gap-4 border-r pr-6 overflow-hidden" :style="{ borderColor: colors.secondary }">
             <div>
               <h4 class="text-lg font-sans font-black uppercase mb-3 flex items-center gap-2" :style="{ color: colors.primary }">
                 <span class="w-2 h-2 rotate-45" :style="{ backgroundColor: colors.primary }"></span>
                 本地快讯
               </h4>
-              <div class="space-y-4">
+              <div class="space-y-3 max-h-[180px] overflow-hidden">
                 <div
                   v-for="(snippet, idx) in data.frontPage.newsSnippets"
                   :key="idx"
@@ -215,7 +215,7 @@ function renderMdInline(text: string) {
                   @click="(e) => handleSelect(`frontPage.newsSnippets.${idx}`, `Snippet ${idx+1}`, e)"
                 >
                   <h5 class="font-bold font-sans text-sm leading-tight mb-1" :style="{ color: colors.secondary }">{{ snippet.title }}</h5>
-                  <p class="text-xs font-serif leading-tight opacity-80 text-justify">{{ snippet.content }}</p>
+                  <p class="text-xs font-serif leading-tight opacity-80 text-justify line-clamp-2">{{ snippet.content }}</p>
                 </div>
               </div>
             </div>
@@ -225,21 +225,21 @@ function renderMdInline(text: string) {
               @click="(e) => handleSelect('frontPage.column1', 'Column 1', e)"
             >
               <h4 class="text-xl font-sans font-bold mb-2 text-center" :style="{ color: colors.primary }">{{ data.frontPage.column1.title }}</h4>
-              <p class="text-xs font-serif text-justify leading-relaxed columns-2 gap-4">{{ data.frontPage.column1.content }}</p>
+              <p class="text-xs font-serif text-justify leading-relaxed columns-2 gap-4 line-clamp-4">{{ data.frontPage.column1.content }}</p>
             </div>
           </div>
-          <div class="flex flex-col gap-6">
+          <div class="flex flex-col justify-between overflow-hidden">
             <div
-              class="relative cursor-pointer"
+              class="flex-1 relative cursor-pointer"
               :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('frontPage.column2') }"
               @click="(e) => handleSelect('frontPage.column2', 'Column 2', e)"
             >
               <div class="absolute -left-2 top-2 w-0 h-0 border-l-[10px] border-l-transparent border-t-[10px] border-r-[10px] border-r-transparent" :style="{ borderTopColor: colors.primary }"></div>
               <h4 class="text-xl font-sans font-bold uppercase mb-2 pl-4" :style="{ color: colors.secondary }">{{ data.frontPage.column2.title }}</h4>
-              <p class="text-xs font-serif text-justify leading-relaxed">{{ data.frontPage.column2.content }}</p>
+              <p class="font-serif text-justify leading-relaxed" style="font-size: clamp(9px, 1.2vw, 11px);">{{ data.frontPage.column2.content }}</p>
             </div>
             <div
-              class="mt-auto cursor-pointer bg-opacity-10 p-4 rounded-tl-[40px] relative"
+              class="flex-1 cursor-pointer bg-opacity-10 px-4 pt-4 pb-2 rounded-tl-[40px] relative"
               :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('frontPage.weirdNews') }"
               :style="{ backgroundColor: colors.accent }"
               @click="(e) => handleSelect('frontPage.weirdNews', 'Weird News', e)"
@@ -248,7 +248,7 @@ function renderMdInline(text: string) {
                 <TriangleLogo class="w-16 h-16 animate-bounce" :color="colors.primary" />
               </div>
               <h4 class="text-xl font-sans font-black uppercase mb-2 text-right mt-4" :style="{ color: colors.primary }">{{ data.frontPage.weirdNews.title }}</h4>
-              <p class="text-xs font-serif leading-relaxed italic text-right">{{ data.frontPage.weirdNews.content }}</p>
+              <p class="text-xs font-serif leading-relaxed italic text-justify">{{ data.frontPage.weirdNews.content }}</p>
             </div>
           </div>
         </div>
@@ -266,7 +266,7 @@ function renderMdInline(text: string) {
             <h2 class="text-4xl font-sans font-black uppercase mb-4 tracking-tight" :style="{ color: colors.secondary }">
               社论：<span :style="{ color: colors.primary }">{{ data.secondPage.editorial.title }}</span>
             </h2>
-            <div class="text-sm font-serif text-justify leading-relaxed columns-2 gap-8 opacity-90 first-letter:text-4xl first-letter:font-bold first-letter:float-left first-letter:mr-2" v-html="renderMd(data.secondPage.editorial.content)"></div>
+            <div class="text-sm font-serif text-justify leading-relaxed columns-2 gap-8 opacity-90 first-letter:text-4xl first-letter:font-bold first-letter:float-left first-letter:mr-2 max-h-[280px] overflow-hidden" v-html="renderMd(data.secondPage.editorial.content)"></div>
           </div>
           <div
             class="flex-1 bg-opacity-5 p-6 rounded-lg border cursor-pointer"
@@ -278,7 +278,7 @@ function renderMdInline(text: string) {
               <div class="w-4 h-4 rounded-full" :style="{ backgroundColor: colors.primary }"></div>
               <h3 class="text-xl font-sans font-bold uppercase" :style="{ color: colors.secondary }">{{ data.secondPage.culture.title }}</h3>
             </div>
-            <p class="text-sm font-serif leading-relaxed text-justify whitespace-pre-wrap">{{ data.secondPage.culture.content }}</p>
+            <p class="text-sm font-serif leading-relaxed text-justify whitespace-pre-wrap line-clamp-[10]">{{ data.secondPage.culture.content }}</p>
           </div>
         </div>
         <div class="col-span-4 flex flex-col gap-6 border-l pl-6" :style="{ borderColor: colors.secondary }">
