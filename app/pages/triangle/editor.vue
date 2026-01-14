@@ -1,3 +1,5 @@
+
+
 <script setup lang="ts">
 import { Lock, Layout, Loader2, Wand2, Save, Upload, Undo2, MousePointerClick, ArrowLeft, BookOpen, RefreshCw, Calendar } from 'lucide-vue-next'
 import PanelGenerator from '~/components/editor/PanelGenerator.vue'
@@ -5,13 +7,13 @@ import PanelDashboard from '~/components/editor/PanelDashboard.vue'
 import PanelEdit from '~/components/editor/PanelEdit.vue'
 import { ThemeType, PublicationType, type GeneratedContent, type NewsData } from '~/types'
 
-const { 
+const {
     topic, date, theme, previewContent, isPublishing, isSaving,
     selectedPath, selectedLabel, isRewriting, rewritePrompt,
     loading, loadingStep, allIssues, loadingIssues,
-    init, loadIssueList, createBlankTemplate, handleGenerate, 
-    handlePublish, handleSaveDraft, handleSelectIssue, getValue, 
-    updateTextData, handleSectionSelect, handleSmartRewrite, 
+    init, loadIssueList, createBlankTemplate, handleGenerate,
+    handlePublish, handleSaveDraft, handleSelectIssue, getValue,
+    updateTextData, handleSectionSelect, handleSmartRewrite,
     handleImageUpload, updateScale, getScale
 } = useNewsEditor(PublicationType.TRIANGLE)
 
@@ -66,13 +68,44 @@ function handleManualCreate() {
 }
 
 function handleLoadLatest() {
-    // This function was trying to mimic loadIssueList logic but specifically for 'latest'.
-    // Since loadIssueList is now available and filters by date, we can just use the first item?
-    // But original code had specific getLatestIssue call. useIssues does not expose it via useNewsEditor easily?
-    // Actually init() calls loadIssueList. 
-    // We can just rely on the list.
     alert("请从下方列表中选择最新一期报纸。")
 }
+
+const state = reactive({
+    topic,
+    date,
+    theme,
+    loading,
+    loadingStep,
+    allIssues,
+    loadingIssues,
+    previewContent,
+    isSaving,
+    isPublishing,
+    selectedPath,
+    selectedLabel,
+    isRewriting,
+    rewritePrompt,
+    
+    // Methods
+    loadIssueList,
+    handleGenerate,
+    handleSelectIssue,
+    createBlankTemplate,
+    handleSaveDraft,
+    handlePublish,
+    getValue,
+    updateTextData,
+    handleSmartRewrite,
+    handleImageUpload,
+    updateScale,
+    getScale,
+    handleReset: () => {
+        previewContent.value = null
+        selectedPath.value = null
+        topic.value = ''
+    }
+})
 </script>
 
 <template>
@@ -88,12 +121,9 @@ function handleLoadLatest() {
 
       <div class="flex-1 overflow-y-auto p-6">
         <!-- STATE 1: GENERATOR (No Content) -->
-        <PanelGenerator 
+        <PanelGenerator
             v-if="!previewContent"
-            :control="{
-                topic, date, theme, loading, loadingStep, allIssues, loadingIssues,
-                loadIssueList, handleGenerate, handleSelectIssue, createBlankTemplate
-            }"
+            :control="state"
             :show-theme-selector="true"
             @manual-create="handleManualCreate"
         />
@@ -101,20 +131,13 @@ function handleLoadLatest() {
         <!-- STATE 2: DASHBOARD (Content Exists, Nothing Selected) -->
         <PanelDashboard
             v-else-if="!selectedPath"
-            :control="{
-                previewContent, isSaving, isPublishing,
-                handleSaveDraft, handlePublish
-            }"
+            :control="state"
         />
 
         <!-- STATE 3: EDITOR (Specific Section Selected) -->
         <PanelEdit
             v-else
-            :control="{
-                selectedPath, selectedLabel, isSaving, isRewriting, rewritePrompt, previewContent,
-                getValue, updateTextData, handleSmartRewrite, handleImageUpload, handleSaveDraft,
-                updateScale, getScale
-            }"
+            :control="state"
             publication-type="TRIANGLE"
         />
       </div>
@@ -131,27 +154,27 @@ function handleLoadLatest() {
         <div class="relative flex gap-1 scale-[0.35] sm:scale-[0.45] lg:scale-[0.55] xl:scale-[0.65] origin-center shadow-2xl">
           <!-- Page 1 (Left) -->
           <div class="shadow-xl">
-            <Newspaper 
-              :data="previewContent.textData" 
-              :theme="displayTheme" 
+            <Newspaper
+              :data="previewContent.textData"
+              :theme="displayTheme"
               :publication-type="PublicationType.TRIANGLE"
-              :image-src="previewContent.imageBase64" 
-              :page="1" 
+              :image-src="previewContent.imageBase64"
+              :page="1"
               :on-section-select="handleSectionSelect"
               :selected-section-id="selectedPath"
             />
           </div>
-          
+
           <!-- Center fold effect -->
           <div class="w-2 bg-gradient-to-r from-stone-400 via-stone-300 to-stone-400 shadow-inner"></div>
-          
+
           <!-- Page 2 (Right) -->
           <div class="shadow-xl">
-            <Newspaper 
-              :data="previewContent.textData" 
-              :theme="displayTheme" 
+            <Newspaper
+              :data="previewContent.textData"
+              :theme="displayTheme"
               :publication-type="PublicationType.TRIANGLE"
-              :page="2" 
+              :page="2"
               :on-section-select="handleSectionSelect"
               :selected-section-id="selectedPath"
             />

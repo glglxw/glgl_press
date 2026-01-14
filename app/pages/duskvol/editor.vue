@@ -57,6 +57,42 @@ function handleManualCreate() {
     }
   }, ThemeType.NOIR)
 }
+
+const state = reactive({
+    topic,
+    date,
+    theme,
+    loading,
+    loadingStep,
+    allIssues,
+    loadingIssues,
+    previewContent,
+    isSaving,
+    isPublishing,
+    selectedPath,
+    selectedLabel,
+    isRewriting,
+    rewritePrompt,
+    
+    // Methods
+    loadIssueList,
+    handleGenerate,
+    handleSelectIssue,
+    createBlankTemplate,
+    handleSaveDraft,
+    handlePublish,
+    getValue,
+    updateTextData,
+    handleSmartRewrite,
+    handleImageUpload,
+    updateScale,
+    getScale,
+    handleReset: () => {
+        previewContent.value = null
+        selectedPath.value = null
+        topic.value = ''
+    }
+})
 </script>
 
 <template>
@@ -74,10 +110,7 @@ function handleManualCreate() {
         <!-- STATE 1: GENERATOR -->
         <PanelGenerator 
             v-if="!previewContent"
-            :control="{
-                topic, date, theme, loading, loadingStep, allIssues, loadingIssues,
-                loadIssueList, handleGenerate, handleSelectIssue, createBlankTemplate
-            }"
+            :control="state"
             :show-theme-selector="false"
             publication-type="DUSKVOL"
             @manual-create="handleManualCreate"
@@ -86,20 +119,13 @@ function handleManualCreate() {
         <!-- STATE 2: DASHBOARD -->
         <PanelDashboard
             v-else-if="!selectedPath"
-            :control="{
-                previewContent, isSaving, isPublishing,
-                handleSaveDraft, handlePublish
-            }"
+            :control="state"
         />
 
         <!-- STATE 3: EDITOR -->
         <PanelEdit
             v-else
-            :control="{
-                selectedPath, selectedLabel, isSaving, isRewriting, rewritePrompt, previewContent,
-                getValue, updateTextData, handleSmartRewrite, handleImageUpload, handleSaveDraft,
-                updateScale, getScale
-            }"
+            :control="state"
             publication-type="DUSKVOL"
         />
       </div>

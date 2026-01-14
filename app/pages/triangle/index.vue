@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Download, Loader2, Newspaper as NewspaperIcon, Archive, X, ChevronRight, Calendar } from 'lucide-vue-next'
-import html2canvas from 'html2canvas'
+import { toPng } from 'html-to-image'
 import { ThemeType, PublicationType, type GeneratedContent } from '~/types'
 
 const { getLatestIssue, getAllIssues } = useIssues()
@@ -20,12 +20,12 @@ onMounted(async () => {
       getLatestIssue(PublicationType.TRIANGLE),
       getAllIssues()
     ])
-    
+
     if (latest) {
       data.value = latest
       theme.value = latest.theme || ThemeType.CLASSIC_RED
     }
-    
+
     if (issues) {
         allIssues.value = issues
         .filter(issue => issue.publicationType === PublicationType.TRIANGLE)
@@ -42,22 +42,86 @@ function handleSelectIssue(issue: GeneratedContent) {
   showArchives.value = false
 }
 
-async function handleDownload(element: HTMLDivElement | null, pageNum: number) {
-  if (element) {
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: null,
-        logging: false
-      })
-      const link = document.createElement('a')
-      link.download = `三角日报-${data.value?.textData.date || 'issue'}-第${pageNum}版.png`
-      link.href = canvas.toDataURL('image/png')
-      link.click()
-    } catch (e) {
-      alert("导出失败")
+const isDownloading = ref(false)
+
+async function handleDownload(type: 'page1' | 'page2' | 'all') {
+  if (!data.value || isDownloading.value) return
+
+  isDownloading.value = true
+
+  try {
+    // create a temporary container
+    const container = document.createElement('div')
+    container.style.position = 'absolute'
+    container.style.left = '-9999px'
+    container.style.top = '0'
+    // Ensure the container has a width that fits the content to avoid wrapping
+    container.style.width = type === 'all' ? '1600px' : '800px'
+    // Add white background explicitly to ensure consistency
+    container.style.backgroundColor = '#ffffff'
+    document.body.appendChild(container)
+
+    // Helper to clone and prepare element
+    const appendClone = (ref: HTMLDivElement | null) => {
+      if (!ref) return
+      // We need to query the actual newspaper content div
+      // Note: we use querySelector to find the newspaper component root
+      const newspaperDiv = ref.querySelector('[class*="w-[794px]"]') as HTMLElement
+      if (newspaperDiv) {
+        const clone = newspaperDiv.cloneNode(true) as HTMLElement
+        clone.style.margin = '0'
+        clone.style.transform = 'none'
+        // Ensure fonts rendering is consistent
+        clone.style.fontFeatureSettings = '"liga" 0'
+        container.appendChild(clone)
+        return true
+      }
+      return false
     }
+
+    if (type === 'page1' || type === 'all') {
+      appendClone(page1Ref.value)
+    }
+
+    // Add gap for combined
+    if (type === 'all') {
+      const gap = document.createElement('div')
+      gap.style.width = '20px'
+      gap.style.height = '1px' // spacer
+      gap.style.display = 'inline-block'
+      container.appendChild(gap)
+
+      // Make container flex to sit side-by-side
+      container.style.display = 'flex'
+      container.style.gap = '0'
+    }
+
+    if (type === 'page2' || type === 'all') {
+      appendClone(page2Ref.value)
+    }
+
+    // Slight delay to ensure DOM render (fonts, images)
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    const dataUrl = await toPng(container, {
+      quality: 1.0,
+      pixelRatio: 2, // High resolution
+      backgroundColor: '#ffffff' // Ensure background is filled
+    })
+
+    const link = document.createElement('a')
+    const suffix = type === 'all' ? '完整版' : type === 'page1' ? '头版' : '副刊'
+    link.download = `三角日报-${data.value.textData.date}-${suffix}.png`
+    link.href = dataUrl
+    link.click()
+
+    // Cleanup
+    document.body.removeChild(container)
+  } catch (e) {
+    console.error(e)
+    alert("导出失败，请重试")
+  } finally {
+    isDownloading.value = false
   }
 }
 </script>
@@ -84,7 +148,7 @@ async function handleDownload(element: HTMLDivElement | null, pageNum: number) {
     <!-- Header Bar -->
     <div class="fixed top-0 left-0 right-0 h-16 bg-white shadow z-10 flex items-center justify-between px-8">
       <div class="flex items-center gap-4">
-        <button 
+        <button
           @click="showArchives = !showArchives"
           class="p-2 hover:bg-stone-100 rounded text-stone-400 hover:text-stone-800 transition-colors"
           title="Open Archives"
@@ -99,11 +163,26 @@ async function handleDownload(element: HTMLDivElement | null, pageNum: number) {
         </div>
       </div>
       <div class="flex gap-2">
-        <button @click="handleDownload(page1Ref, 1)" class="px-4 py-2 bg-stone-800 text-white text-xs font-bold uppercase hover:bg-black flex items-center gap-2">
+        <button
+          @click="handleDownload('page1')"
+          :disabled="isDownloading"
+          class="px-4 py-2 bg-stone-800 text-white text-xs font-bold uppercase hover:bg-black flex items-center gap-2 disabled:opacity-50"
+        >
           <Download class="w-3 h-3" /> 头版
         </button>
-        <button @click="handleDownload(page2Ref, 2)" class="px-4 py-2 bg-stone-800 text-white text-xs font-bold uppercase hover:bg-black flex items-center gap-2">
+        <button
+          @click="handleDownload('page2')"
+          :disabled="isDownloading"
+          class="px-4 py-2 bg-stone-800 text-white text-xs font-bold uppercase hover:bg-black flex items-center gap-2 disabled:opacity-50"
+        >
           <Download class="w-3 h-3" /> 副刊
+        </button>
+        <button
+          @click="handleDownload('all')"
+          :disabled="isDownloading"
+          class="px-4 py-2 bg-red-600 text-white text-xs font-bold uppercase hover:bg-red-700 flex items-center gap-2 disabled:opacity-50"
+        >
+          <Download class="w-3 h-3" /> 完整版
         </button>
       </div>
     </div>
@@ -113,25 +192,25 @@ async function handleDownload(element: HTMLDivElement | null, pageNum: number) {
       <div class="relative flex gap-1 scale-[0.3] sm:scale-[0.4] md:scale-[0.5] lg:scale-[0.6] xl:scale-[0.7] origin-center shadow-2xl transition-all">
         <!-- Page 1 (Left) -->
         <div ref="page1Ref" class="shadow-xl">
-          <Newspaper 
-            :data="data.textData" 
-            :theme="theme" 
+          <Newspaper
+            :data="data.textData"
+            :theme="theme"
             :publication-type="PublicationType.TRIANGLE"
-            :image-src="data.imageBase64" 
-            :page="1" 
+            :image-src="data.imageBase64"
+            :page="1"
           />
         </div>
-        
+
         <!-- Center fold effect -->
         <div class="w-2 bg-gradient-to-r from-stone-400 via-stone-300 to-stone-400 shadow-inner"></div>
-        
+
         <!-- Page 2 (Right) -->
         <div ref="page2Ref" class="shadow-xl">
-          <Newspaper 
-            :data="data.textData" 
-            :theme="theme" 
+          <Newspaper
+            :data="data.textData"
+            :theme="theme"
             :publication-type="PublicationType.TRIANGLE"
-            :page="2" 
+            :page="2"
           />
         </div>
       </div>
@@ -146,7 +225,7 @@ async function handleDownload(element: HTMLDivElement | null, pageNum: number) {
         class="w-6 h-6 rounded-full border-2 transition-transform"
         :class="theme === t ? 'border-stone-800 scale-110' : 'border-transparent'"
         :style="{
-          backgroundColor: t === ThemeType.CLASSIC_RED ? '#dc2626' : 
+          backgroundColor: t === ThemeType.CLASSIC_RED ? '#dc2626' :
                           t === ThemeType.DEEP_BLUE ? '#1e3a8a' :
                           t === ThemeType.EMERALD ? '#047857' : '#171717'
         }"
@@ -155,7 +234,7 @@ async function handleDownload(element: HTMLDivElement | null, pageNum: number) {
     </div>
 
     <!-- Editor Link -->
-    <NuxtLink 
+    <NuxtLink
       to="/triangle/editor"
       class="fixed bottom-4 right-4 z-50 px-3 py-1 bg-black text-white text-[10px] uppercase font-bold tracking-widest opacity-20 hover:opacity-100 transition-opacity rounded shadow-lg"
     >
@@ -163,13 +242,13 @@ async function handleDownload(element: HTMLDivElement | null, pageNum: number) {
     </NuxtLink>
 
     <!-- Archives Drawer -->
-    <div 
-      v-if="showArchives" 
+    <div
+      v-if="showArchives"
       class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
       @click="showArchives = false"
     ></div>
-    
-    <div 
+
+    <div
       class="fixed inset-y-0 left-0 w-80 bg-stone-100 border-r border-stone-200 z-50 transform transition-transform duration-300 ease-in-out shadow-2xl flex flex-col font-sans"
       :class="showArchives ? 'translate-x-0' : '-translate-x-full'"
     >
@@ -177,14 +256,14 @@ async function handleDownload(element: HTMLDivElement | null, pageNum: number) {
         <h2 class="font-black uppercase tracking-tighter text-red-600 flex items-center gap-2">
           <Archive class="w-4 h-4" /> Archives
         </h2>
-        <button 
+        <button
           @click="showArchives = false"
           class="text-stone-500 hover:text-stone-800"
         >
           <X class="w-5 h-5" />
         </button>
       </div>
-      
+
       <div class="flex-1 overflow-y-auto p-4 space-y-2 bg-stone-50">
         <button
           v-for="issue in allIssues"

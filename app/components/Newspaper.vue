@@ -74,7 +74,7 @@ const volumeNumber = computed(() => {
         const epoch = new Date('2024-01-01').getTime()
         const current = new Date(props.data.date).getTime()
         if (isNaN(current)) return 700
-        
+
         const diffIds = Math.floor((current - epoch) / (1000 * 60 * 60 * 24))
         return Math.max(1, 100 + diffIds) // Base volume 100
     } catch {
@@ -103,15 +103,15 @@ function renderMdInline(text: string) {
 
 <template>
   <!-- Triangle Layout -->
-  <div 
+  <div
     v-if="!isDuskvol"
     class="w-[794px] h-[1123px] flex-shrink-0 relative overflow-hidden shadow-2xl origin-top"
     :style="{ backgroundColor: colors.background, color: colors.text }"
     @click="handleClear"
   >
     <!-- Left Border Pattern -->
-    <div 
-      class="absolute left-0 top-0 bottom-0 w-12 border-r-2 border-dashed z-0 flex flex-col overflow-hidden" 
+    <div
+      class="absolute left-0 top-0 bottom-0 w-12 border-r-2 border-dashed z-0 flex flex-col overflow-hidden"
       :style="{ borderColor: colors.secondary }"
     >
       <TrianglePattern class="h-full w-40 -ml-4" :color="colors.secondary" />
@@ -119,26 +119,26 @@ function renderMdInline(text: string) {
 
     <div class="ml-12 h-full flex flex-col relative z-10">
       <!-- Header -->
-      <header 
-        class="border-b-4 flex items-center justify-between py-4 px-8 relative" 
+      <header
+        class="border-b-4 flex items-center justify-between py-4 px-8 relative"
         :style="{ borderColor: colors.primary }"
       >
-        <div 
-          class="absolute top-1 left-2 text-[10px] opacity-60 font-sans tracking-widest" 
+        <div
+          class="absolute top-1 left-2 text-[10px] opacity-60 font-sans tracking-widest"
           :style="{ color: colors.secondary }"
         >
-          第 {{ Math.floor(Math.random() * 10000) }} 期 • {{ page === 1 ? '头版' : '副刊' }}
+          第 {{ volumeNumber }} 期 • {{ page === 1 ? '头版' : '副刊' }}
         </div>
         <div class="flex-1 text-center">
-          <h1 
-            :class="[page === 1 ? 'text-7xl' : 'text-5xl', 'font-sans font-black tracking-widest uppercase flex items-center justify-center gap-4']" 
+          <h1
+            :class="[page === 1 ? 'text-7xl' : 'text-5xl', 'font-sans font-black tracking-widest uppercase flex items-center justify-center gap-4']"
             :style="{ color: colors.primary }"
           >
             <TriangleLogo :class="page === 1 ? 'w-12 h-12' : 'w-8 h-8'" :color="colors.primary" />
             {{ themeName }}
           </h1>
         </div>
-        <div 
+        <div
           class="flex flex-col items-end font-sans font-bold leading-tight cursor-pointer"
           :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('date') }"
           :style="{ color: colors.primary }"
@@ -180,13 +180,13 @@ function renderMdInline(text: string) {
             </div>
           </div>
           <div class="col-span-5 relative">
-            <div 
+            <div
               class="w-full h-full cursor-pointer"
               :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('image') }"
               @click="(e) => handleSelect('image', 'Main Image', e)"
             >
-              <div 
-                class="w-full h-full min-h-[240px] border-4 p-1 bg-white relative shadow-lg" 
+              <div
+                class="w-full h-full min-h-[240px] border-4 p-1 bg-white relative shadow-lg"
                 :style="{ borderColor: colors.primary }"
               >
                 <img v-if="imageSrc" :src="imageSrc" class="w-full h-full object-cover" alt="News" />
@@ -197,7 +197,7 @@ function renderMdInline(text: string) {
             </div>
           </div>
         </div>
-        
+
         <div class="grid grid-cols-2 gap-8 flex-1">
           <div class="flex flex-col gap-6 border-r pr-6" :style="{ borderColor: colors.secondary }">
             <div>
@@ -206,8 +206,8 @@ function renderMdInline(text: string) {
                 本地快讯
               </h4>
               <div class="space-y-4">
-                <div 
-                  v-for="(snippet, idx) in data.frontPage.newsSnippets" 
+                <div
+                  v-for="(snippet, idx) in data.frontPage.newsSnippets"
                   :key="idx"
                   class="relative pl-4 border-l-2 cursor-pointer"
                   :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected(`frontPage.newsSnippets.${idx}`) }"
@@ -285,8 +285,8 @@ function renderMdInline(text: string) {
           <div class="flex-1">
             <div class="bg-stone-900 text-white p-2 mb-4 text-center font-sans font-bold uppercase tracking-widest" :style="{ backgroundColor: colors.secondary }">分类广告</div>
             <div class="space-y-4">
-              <div 
-                v-for="(ad, idx) in data.secondPage.classifieds" 
+              <div
+                v-for="(ad, idx) in data.secondPage.classifieds"
                 :key="idx"
                 class="border-b pb-2 last:border-0 border-dashed cursor-pointer"
                 :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected(`secondPage.classifieds.${idx}`) }"
@@ -323,7 +323,7 @@ function renderMdInline(text: string) {
   </div>
 
   <!-- Duskvol Layout -->
-  <div 
+  <div
     v-else
     class="w-[794px] h-[1123px] flex-shrink-0 relative overflow-hidden shadow-2xl origin-top font-serif flex flex-col"
     :style="{ backgroundColor: duskvolColors.bg, color: duskvolColors.text }"
@@ -331,7 +331,7 @@ function renderMdInline(text: string) {
   >
     <!-- Background Texture -->
     <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(circle, #44403c 1px, transparent 1px); background-size: 20px 20px;"></div>
-    
+
     <!-- Border Frame -->
     <div class="absolute inset-4 border-2 border-double pointer-events-none" :style="{ borderColor: duskvolColors.accent }"></div>
     <div class="absolute inset-6 border pointer-events-none" :style="{ borderColor: duskvolColors.border }"></div>
@@ -341,7 +341,7 @@ function renderMdInline(text: string) {
     <header class="pt-12 mx-12 relative z-10">
       <div class="flex justify-between items-end pb-2" :style="{ borderColor: duskvolColors.accent }">
         <div class="font-serif text-xs tracking-[0.2em] opacity-60">
-          <span 
+          <span
             class="cursor-pointer"
             :class="{ 'ring-2 ring-blue-500': isSelected('date') }"
             @click="(e) => handleSelect('date', 'Date', e)"
@@ -376,14 +376,14 @@ function renderMdInline(text: string) {
               <h3 class="font-bold border-b pb-1 mb-2 uppercase text-sm tracking-widest" :style="{ borderColor: duskvolColors.accent }">{{ data.frontPage.column1.title }}</h3>
               <p class="text-xs text-justify leading-relaxed opacity-80">{{ data.frontPage.column1.content }}</p>
             </div>
-            
+
             <div class="flex-1">
               <h3 class="font-bold border-b pb-1 mb-4 uppercase text-sm tracking-widest flex items-center gap-2" :style="{ borderColor: duskvolColors.accent }">
                 <Zap :size="12" /> Whispers
               </h3>
               <div class="space-y-4">
-                <div 
-                  v-for="(snippet, idx) in data.frontPage.newsSnippets" 
+                <div
+                  v-for="(snippet, idx) in data.frontPage.newsSnippets"
                   :key="idx"
                   class="relative pl-3 border-l cursor-pointer"
                   :class="{ 'ring-2 ring-blue-500': isSelected(`frontPage.newsSnippets.${idx}`) }"
@@ -406,8 +406,8 @@ function renderMdInline(text: string) {
             >
               <h2 class="text-4xl font-bold leading-tight mb-2 font-serif text-white">{{ data.frontPage.headline }}</h2>
             </div>
-            
-            <div 
+
+            <div
               class="w-full h-48 border-4 border-double cursor-pointer"
               :class="{ 'ring-2 ring-blue-500': isSelected('image') }"
               :style="{ borderColor: duskvolColors.border }"
@@ -461,8 +461,8 @@ function renderMdInline(text: string) {
         <div class="col-span-4 border-r border-double pr-6" :style="{ borderColor: duskvolColors.border }">
           <h3 class="text-2xl font-bold mb-6 text-center border-b pb-2 uppercase tracking-widest">Classifieds</h3>
           <div class="space-y-6">
-            <div 
-              v-for="(ad, idx) in data.secondPage.classifieds" 
+            <div
+              v-for="(ad, idx) in data.secondPage.classifieds"
               :key="idx"
               class="text-center cursor-pointer"
               :class="{ 'ring-2 ring-blue-500': isSelected(`secondPage.classifieds.${idx}`) }"

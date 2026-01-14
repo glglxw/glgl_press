@@ -26,7 +26,7 @@ const props = defineProps<{
     <div id="global-actions">
       <h3 class="section-title">Global Actions</h3>
       <button 
-        @click="control.previewContent = null"
+        @click="control.handleReset ? control.handleReset() : (control.previewContent = null)"
         id="btn-reset"
       >
         <Undo2 class="w-3 h-3" /> Reset / New

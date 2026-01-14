@@ -8,7 +8,7 @@ export function useNewsEditor(publicationType: PublicationType) {
 
     // State
     const topic = ref('')
-    const date = ref(new Date().toISOString().split('T')[0])
+    const date = ref(new Date().toLocaleDateString('en-CA')) // YYYY-MM-DD in user's local timezone
     const theme = ref<ThemeType | null>(null)
 
     const previewContent = ref<GeneratedContent | null>(null)
@@ -77,6 +77,8 @@ export function useNewsEditor(publicationType: PublicationType) {
         try {
             const result = await saveIssue(previewContent.value)
             if (result) {
+                previewContent.value = result
+                await loadIssueList()
                 return true
             }
             return false
