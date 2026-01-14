@@ -58,11 +58,46 @@ function isSelected(path: string) {
 }
 
 // Duskvol colors
-const duskvolColors = {
-  accent: computed(() => THEMES[props.theme].accent),
+const duskvolColors = computed(() => ({
+  accent: THEMES[props.theme].accent,
   text: '#e7e5e4',
   bg: '#1c1917',
   border: '#44403c'
+}))
+
+// Deterministic Volume Number based on date
+const volumeNumber = computed(() => {
+    if (!props.data.date) return 700
+    try {
+        // Calculate days since a "start" epoch to simulate realistic volume numbers
+        // Let's say Vol 1 was Jan 1, 2024
+        const epoch = new Date('2024-01-01').getTime()
+        const current = new Date(props.data.date).getTime()
+        if (isNaN(current)) return 700
+        
+        const diffIds = Math.floor((current - epoch) / (1000 * 60 * 60 * 24))
+        return Math.max(1, 100 + diffIds) // Base volume 100
+    } catch {
+        return 700
+    }
+})
+
+// Markdown Rendering
+import MarkdownIt from 'markdown-it'
+const md = new MarkdownIt({
+  html: true,
+  breaks: true,
+  typographer: true
+})
+
+function renderMd(text: string) {
+  if (!text) return ''
+  return md.render(text)
+}
+
+function renderMdInline(text: string) {
+  if (!text) return ''
+  return md.renderInline(text)
 }
 </script>
 
@@ -231,9 +266,7 @@ const duskvolColors = {
             <h2 class="text-4xl font-sans font-black uppercase mb-4 tracking-tight" :style="{ color: colors.secondary }">
               社论：<span :style="{ color: colors.primary }">{{ data.secondPage.editorial.title }}</span>
             </h2>
-            <div class="text-sm font-serif text-justify leading-6 columns-2 gap-8 opacity-90 first-letter:text-4xl first-letter:font-bold first-letter:float-left first-letter:mr-2">
-              {{ data.secondPage.editorial.content }}
-            </div>
+            <div class="text-sm font-serif text-justify leading-relaxed columns-2 gap-8 opacity-90 first-letter:text-4xl first-letter:font-bold first-letter:float-left first-letter:mr-2" v-html="renderMd(data.secondPage.editorial.content)"></div>
           </div>
           <div
             class="flex-1 bg-opacity-5 p-6 rounded-lg border cursor-pointer"
@@ -315,7 +348,7 @@ const duskvolColors = {
           >{{ data.date }}</span>
         </div>
         <div class="font-serif text-xs tracking-[0.2em] opacity-60">
-          VOL. {{ Math.floor(Math.random() * 1000) }} • PRICE: 1 COIN
+          VOL. {{ volumeNumber }}
         </div>
       </div>
     </header>
@@ -365,7 +398,7 @@ const duskvolColors = {
           </div>
 
           <!-- Middle (Main Story) -->
-          <div class="col-span-2 flex flex-col gap-4">
+          <div class="col-span-2 flex flex-col gap-2">
             <div
               class="cursor-pointer"
               :class="{ 'ring-2 ring-blue-500': isSelected('frontPage.headline') }"
@@ -375,7 +408,7 @@ const duskvolColors = {
             </div>
             
             <div 
-              class="w-full h-64 border-4 border-double cursor-pointer"
+              class="w-full h-48 border-4 border-double cursor-pointer"
               :class="{ 'ring-2 ring-blue-500': isSelected('image') }"
               :style="{ borderColor: duskvolColors.border }"
               @click="(e) => handleSelect('image', 'Main Image', e)"
@@ -397,7 +430,7 @@ const duskvolColors = {
               </div>
             </div>
 
-            <div class="mt-auto border-t pt-4 flex gap-4" :style="{ borderColor: duskvolColors.border }">
+            <div class="mt-auto border-t pt-2 flex gap-2" :style="{ borderColor: duskvolColors.border }">
               <div class="flex-1">
                 <div
                   class="cursor-pointer"
