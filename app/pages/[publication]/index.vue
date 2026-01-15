@@ -9,6 +9,8 @@ const publication = computed(() => (route.params.publication as string) || 'tria
 const config = computed(() => getEditorConfig(publication.value))
 
 const { getLatestIssue, getAllIssues } = useIssues()
+const { t } = useI18n()
+
 
 const loading = ref(true)
 const data = ref<GeneratedContent | null>(null)
@@ -125,7 +127,7 @@ async function handleDownload(type: 'page1' | 'page2' | 'all') {
     document.body.removeChild(container)
   } catch (e) {
     console.error(e)
-    alert("导出失败")
+    alert(t('publication.common.exportFailed'))
   } finally {
     isDownloading.value = false
   }
@@ -140,7 +142,7 @@ const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
     <div v-if="loading" class="h-screen w-full flex items-center justify-center flex-col gap-4"
          :class="config.isDark ? 'bg-stone-900 text-stone-400' : 'bg-stone-100 text-stone-500'">
       <Loader2 class="w-8 h-8 animate-spin" />
-      <p class="font-serif tracking-widest uppercase text-xs">{{ config.isDark ? 'Connecting to the Void...' : '正在连接新闻服务器...' }}</p>
+      <p class="font-serif tracking-widest uppercase text-xs">{{ config.isDark ? t('publication.common.loadingVoid') : t('publication.common.loading') }}</p>
     </div>
 
     <!-- No Data State -->
@@ -148,13 +150,13 @@ const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
          :class="config.isDark ? 'bg-stone-900 text-stone-400' : 'bg-stone-100 text-stone-500'">
       <component :is="IconComponent" class="w-16 h-16 opacity-20" />
       <h1 class="text-xl font-bold" :class="config.isDark ? 'text-stone-200' : ''">
-        {{ config.isDark ? 'No Chronicle Published' : '暂无日报发布' }}
+        {{ config.isDark ? t('publication.common.noDataVoid') : t('publication.common.noData') }}
       </h1>
       <p class="font-serif text-sm">{{ config.emptyStateText }}</p>
       <NuxtLink :to="`/${publication}/editor`" 
                 class="mt-4 px-6 py-2 text-white font-bold rounded"
                 :class="config.isDark ? 'bg-stone-700 hover:bg-stone-600' : 'bg-red-600 hover:bg-red-700'">
-        {{ config.isDark ? 'Enter the Press Room' : '前往编辑器' }}
+        {{ config.isDark ? t('publication.common.enterEditorVoid') : t('publication.common.enterEditor') }}
       </NuxtLink>
     </div>
 
@@ -169,7 +171,7 @@ const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
           <NuxtLink to="/"
                     class="p-2 rounded transition-colors"
                     :class="config.isDark ? 'hover:bg-stone-700 text-stone-400 hover:text-stone-200' : 'hover:bg-stone-100 text-stone-400 hover:text-stone-800'"
-                    title="返回主页">
+                    :title="t('publication.common.backHome')">
             <Home class="w-5 h-5" />
           </NuxtLink>
           <button @click="showArchives = !showArchives"
@@ -191,17 +193,17 @@ const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
           <button @click="handleDownload('page1')" :disabled="isDownloading"
                   class="px-4 py-2 text-white text-xs font-bold uppercase flex items-center gap-2 disabled:opacity-50"
                   :class="config.isDark ? 'bg-stone-700 hover:bg-stone-600' : 'bg-stone-800 hover:bg-black'">
-            <Download class="w-3 h-3" /> {{ config.isDark ? 'Page 1' : '头版' }}
+            <Download class="w-3 h-3" /> {{ config.isDark ? t('publication.common.page1') : t('publication.common.page1') }}
           </button>
           <button @click="handleDownload('page2')" :disabled="isDownloading"
                   class="px-4 py-2 text-white text-xs font-bold uppercase flex items-center gap-2 disabled:opacity-50"
                   :class="config.isDark ? 'bg-stone-700 hover:bg-stone-600' : 'bg-stone-800 hover:bg-black'">
-            <Download class="w-3 h-3" /> {{ config.isDark ? 'Page 2' : '副刊' }}
+            <Download class="w-3 h-3" /> {{ config.isDark ? t('publication.common.page2') : t('publication.common.page2') }}
           </button>
           <button @click="handleDownload('all')" :disabled="isDownloading"
                   class="px-4 py-2 text-white text-xs font-bold uppercase flex items-center gap-2 disabled:opacity-50"
                   :class="config.isDark ? 'bg-blue-900 hover:bg-blue-800' : 'bg-red-600 hover:bg-red-700'">
-            <Download class="w-3 h-3" /> {{ config.isDark ? 'Full Issue' : '完整版' }}
+            <Download class="w-3 h-3" /> {{ config.isDark ? t('publication.common.fullIssue') : t('publication.common.fullIssue') }}
           </button>
         </div>
       </div>
@@ -240,7 +242,7 @@ const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
       <NuxtLink :to="`/${publication}/editor`"
                 class="fixed bottom-4 right-4 z-50 px-3 py-1 text-white text-[10px] uppercase font-bold tracking-widest opacity-20 hover:opacity-100 transition-opacity rounded shadow-lg"
                 :class="config.isDark ? 'bg-stone-700' : 'bg-black'">
-        {{ config.isDark ? 'Press Room' : 'Editor' }}
+        {{ config.isDark ? t('publication.common.pressRoomVoid') : t('publication.common.pressRoom') }}
       </NuxtLink>
 
       <!-- Archives Drawer Backdrop -->
@@ -258,7 +260,7 @@ const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
              :class="config.isDark ? 'border-stone-800' : 'border-stone-200 bg-white'">
           <h2 class="font-black uppercase tracking-tighter flex items-center gap-2"
               :class="config.isDark ? 'text-stone-400 tracking-widest' : 'text-red-600'">
-            <Archive class="w-4 h-4" /> Archives
+            <Archive class="w-4 h-4" /> {{ t('publication.common.archives') }}
           </h2>
           <button @click="showArchives = false"
                   :class="config.isDark ? 'text-stone-500 hover:text-stone-300' : 'text-stone-500 hover:text-stone-800'">

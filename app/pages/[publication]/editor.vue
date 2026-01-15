@@ -5,6 +5,8 @@ import PanelEdit from '~/components/editor/PanelEdit.vue'
 import { ThemeType, PublicationType } from '~/types'
 import { getEditorConfig } from '~/config/editorConfig'
 
+const { t } = useI18n()
+
 const route = useRoute()
 const publication = computed(() => (route.params.publication as string) || 'triangle')
 const config = computed(() => getEditorConfig(publication.value))
@@ -86,10 +88,10 @@ const state = reactive({
         <h2 class="text-2xl font-black uppercase tracking-tighter flex items-center gap-2"
             :class="config.isDark ? 'text-stone-100' : 'text-stone-800'">
           <component :is="config.icon" class="w-5 h-5" />
-          {{ config.title }}
+          {{ t(`publication.${publication}.editor.title`) }}
         </h2>
         <p class="text-xs font-serif" :class="config.isDark ? 'text-stone-400 italic' : 'text-stone-500'">
-          {{ config.subtitle }}
+          {{ t(`publication.${publication}.editor.subtitle`) }}
         </p>
       </div>
 
@@ -126,7 +128,7 @@ const state = reactive({
       <div v-if="!previewContent" class="flex-1 flex flex-col items-center justify-center gap-4"
            :class="config.isDark ? 'text-stone-600' : 'text-stone-400'">
         <component :is="config.icon" class="w-16 h-16 opacity-20" />
-        <p class="font-serif" :class="config.isDark ? 'italic' : ''">{{ config.emptyStateText }}</p>
+        <p class="font-serif" :class="config.isDark ? 'italic' : ''">{{ t(`publication.${publication}.editor.emptyState`) }}</p>
       </div>
       <template v-else>
         <!-- Side-by-side newspaper layout with center fold -->

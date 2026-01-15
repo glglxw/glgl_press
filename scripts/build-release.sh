@@ -86,9 +86,10 @@ assemble_package() {
     
     # 复制数据目录结构
     mkdir -p "$BUILD_DIR/server/data"
-    if [ -d "$PROJECT_DIR/server/data" ]; then
-        cp -r "$PROJECT_DIR/server/data/"* "$BUILD_DIR/server/data/" 2>/dev/null || true
-    fi
+    # 不复制已有数据，生成纯净版
+    # if [ -d "$PROJECT_DIR/server/data" ]; then
+    #     cp -r "$PROJECT_DIR/server/data/"* "$BUILD_DIR/server/data/" 2>/dev/null || true
+    # fi
     
     # 复制 release 文件
     cp "$RELEASE_DIR/启动.bat" "$BUILD_DIR/"

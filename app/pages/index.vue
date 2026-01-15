@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { BookOpen, Printer, Scroll } from 'lucide-vue-next'
+const { t } = useI18n()
 </script>
 
 <template>
@@ -11,10 +12,10 @@ import { BookOpen, Printer, Scroll } from 'lucide-vue-next'
     <!-- Hero Section -->
     <div class="pt-24 pb-16 px-4 text-center relative z-10">
       <h1 class="text-5xl md:text-7xl font-black tracking-tight mb-6 text-transparent bg-clip-text bg-gradient-to-b from-stone-100 to-stone-400 drop-shadow-[0_2px_10px_rgba(255,255,255,0.1)] uppercase">
-        Glgl Press
+        {{ t('home.title') }}
       </h1>
       <p class="text-stone-500 text-xl max-w-2xl mx-auto italic border-y border-stone-800 py-4">
-        "Printing the multiverse, one page at a time."
+        {{ t('home.subtitle') }}
       </p>
     </div>
 
@@ -34,13 +35,13 @@ import { BookOpen, Printer, Scroll } from 'lucide-vue-next'
             <TriangleLogo class="w-24 h-24 text-stone-700 group-hover:text-red-500 transition-all duration-500 drop-shadow-[0_0_10px_rgba(220,38,38,0.5)]" />
           </div>
           <div class="p-8 flex flex-col h-[calc(100%-14rem)]">
-            <h2 class="text-3xl font-black uppercase mb-1 text-stone-300 group-hover:text-red-500 transition-colors font-sans tracking-wide">Triangle Daily</h2>
-            <div class="text-[10px] font-bold tracking-[0.2em] uppercase text-red-900/50 group-hover:text-red-500/50 mb-6 transition-colors font-sans">Corporate • Sci-Fi • Geometric</div>
+            <h2 class="text-3xl font-black uppercase mb-1 text-stone-300 group-hover:text-red-500 transition-colors font-sans tracking-wide">{{ t('home.publications.triangle.title') }}</h2>
+            <div class="text-[10px] font-bold tracking-[0.2em] uppercase text-red-900/50 group-hover:text-red-500/50 mb-6 transition-colors font-sans">{{ t('home.publications.triangle.tags') }}</div>
             <p class="text-sm text-stone-500 leading-relaxed mb-6 font-sans">
-              For the discerning modern citizen. Geometric precision, corporate euphemisms, and clean lines.
+              {{ t('home.publications.triangle.description') }}
             </p>
             <div class="mt-auto pt-6 border-t border-stone-800 flex justify-between items-center group-hover:border-red-900/30 transition-colors">
-              <span class="text-xs font-bold uppercase tracking-wider text-stone-600 group-hover:text-red-500 transition-colors font-sans">Enter System</span>
+              <span class="text-xs font-bold uppercase tracking-wider text-stone-600 group-hover:text-red-500 transition-colors font-sans">{{ t('home.publications.triangle.action') }}</span>
               <BookOpen class="w-4 h-4 text-stone-700 group-hover:text-red-500 transition-colors" />
             </div>
           </div>
@@ -58,13 +59,13 @@ import { BookOpen, Printer, Scroll } from 'lucide-vue-next'
             <span class="text-7xl grayscale group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">👻</span>
           </div>
           <div class="p-8 flex flex-col h-[calc(100%-14rem)]">
-            <h2 class="text-3xl font-black uppercase mb-1 text-stone-400 group-hover:text-blue-400 transition-colors font-serif tracking-tight">Duskvol Chronicle</h2>
-            <div class="text-[10px] font-bold tracking-[0.2em] uppercase text-blue-900/40 group-hover:text-blue-500/40 mb-6 transition-colors">Noir • Industrial • Ghostly</div>
+            <h2 class="text-3xl font-black uppercase mb-1 text-stone-400 group-hover:text-blue-400 transition-colors font-serif tracking-tight">{{ t('home.publications.duskvol.title') }}</h2>
+            <div class="text-[10px] font-bold tracking-[0.2em] uppercase text-blue-900/40 group-hover:text-blue-500/40 mb-6 transition-colors">{{ t('home.publications.duskvol.tags') }}</div>
             <p class="text-sm text-stone-500 leading-relaxed mb-6">
-              Whispers from the void. Industrial decay, ghosts, and shadows in a city of eternal night.
+              {{ t('home.publications.duskvol.description') }}
             </p>
             <div class="mt-auto pt-6 border-t border-stone-800 flex justify-between items-center group-hover:border-blue-900/30 transition-colors">
-              <span class="text-xs font-bold uppercase tracking-wider text-stone-600 group-hover:text-blue-400 transition-colors">Enter Shadows</span>
+              <span class="text-xs font-bold uppercase tracking-wider text-stone-600 group-hover:text-blue-400 transition-colors">{{ t('home.publications.duskvol.action') }}</span>
               <BookOpen class="w-4 h-4 text-stone-700 group-hover:text-blue-400 transition-colors" />
             </div>
           </div>
@@ -88,13 +89,13 @@ import { BookOpen, Printer, Scroll } from 'lucide-vue-next'
             <Scroll class="w-24 h-24 text-[#8b5a2b] group-hover:text-[#654321] group-hover:scale-110 transition-all duration-500 drop-shadow-[2px_4px_6px_rgba(0,0,0,0.2)]" :stroke-width="1.5" />
           </div>
           <div class="p-8 flex flex-col h-[calc(100%-14rem)] relative">
-            <h2 class="text-3xl font-black uppercase mb-1 text-[#4a3728] group-hover:text-[#2c1810] transition-colors font-serif tracking-wide drop-shadow-sm">Adventurer's Guild</h2>
-            <div class="text-[10px] font-bold tracking-[0.2em] uppercase text-[#8b5a2b]/70 mb-6 border-b border-[#d2b48c] pb-2">Fantasy • Quests • Rumors</div>
+            <h2 class="text-3xl font-black uppercase mb-1 text-[#4a3728] group-hover:text-[#2c1810] transition-colors font-serif tracking-wide drop-shadow-sm">{{ t('home.publications.adventurer.title') }}</h2>
+            <div class="text-[10px] font-bold tracking-[0.2em] uppercase text-[#8b5a2b]/70 mb-6 border-b border-[#d2b48c] pb-2">{{ t('home.publications.adventurer.tags') }}</div>
             <p class="text-sm text-[#5d4037] leading-relaxed mb-6 font-serif italic">
-              "Hear ye, hear ye! Fresh bounties and tavern tales for heroes and vagabonds alike."
+              {{ t('home.publications.adventurer.description') }}
             </p>
             <div class="mt-auto pt-6 border-t border-[#d2b48c] flex justify-between items-center">
-              <span class="text-xs font-bold uppercase tracking-wider text-[#8b5a2b] group-hover:text-[#654321] transition-colors">Open Scroll</span>
+              <span class="text-xs font-bold uppercase tracking-wider text-[#8b5a2b] group-hover:text-[#654321] transition-colors">{{ t('home.publications.adventurer.action') }}</span>
               <BookOpen class="w-4 h-4 text-[#8b5a2b] group-hover:text-[#654321] transition-colors" />
             </div>
           </div>
@@ -105,7 +106,7 @@ import { BookOpen, Printer, Scroll } from 'lucide-vue-next'
 
     <!-- Footer -->
     <div class="py-8 text-center text-stone-600 text-[10px] uppercase tracking-[0.2em] relative z-10">
-      Triangle Times Generator © 2026 • Crafted in the Multiverse
+      {{ t('home.footer') }}
     </div>
   </div>
 </template>

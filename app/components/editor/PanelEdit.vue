@@ -108,7 +108,7 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
         <div class="field-group">
           <div class="flex justify-between items-baseline">
             <label>{{ t('editor.content') }}</label>
-            <div class="help-text-mono">MD: **bold** *italic* # Large</div>
+            <div class="help-text-mono">{{ t('editor.mdHint') }}</div>
           </div>
           <textarea 
             class="text-area h-48" 
@@ -137,7 +137,7 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
       <div v-else class="field-group">
         <div class="flex justify-between items-baseline">
           <label>{{ t('editor.textContent') }}</label>
-          <div class="help-text-mono">MD: **bold** *italic*</div>
+          <div class="help-text-mono">{{ t('editor.mdHint') }}</div>
         </div>
         <textarea 
           class="text-area h-32" 
