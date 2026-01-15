@@ -11,7 +11,8 @@ export default defineEventHandler(async (event) => {
         instruction: string
     }>(event)
 
-    const ai = new GoogleGenAI({ apiKey: config.geminiApiKey })
+    const httpOptions = config.geminiBaseUrl ? { baseUrl: config.geminiBaseUrl } : undefined
+    const ai = new GoogleGenAI({ apiKey: config.geminiApiKey, httpOptions })
 
     const prompt = `
     You are a professional newspaper editor.

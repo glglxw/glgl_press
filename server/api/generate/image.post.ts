@@ -15,7 +15,8 @@ export default defineEventHandler(async (event) => {
         publication: PublicationType
     }>(event)
 
-    const ai = new GoogleGenAI({ apiKey: config.geminiApiKey })
+    const httpOptions = config.geminiBaseUrl ? { baseUrl: config.geminiBaseUrl } : undefined
+    const ai = new GoogleGenAI({ apiKey: config.geminiApiKey, httpOptions })
 
     let styleSuffix = " Photorealistic, high quality newspaper photography style, slightly grainy print texture."
 

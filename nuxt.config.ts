@@ -9,6 +9,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Server-only - accessible via process.env or useRuntimeConfig()
     geminiApiKey: process.env.API_KEY || '',
+    geminiBaseUrl: process.env.API_BASE_URL || '',
     public: {
       // Client-side accessible
     }

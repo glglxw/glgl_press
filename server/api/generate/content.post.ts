@@ -114,7 +114,8 @@ export default defineEventHandler(async (event) => {
         publication: body.publication
     })
 
-    const ai = new GoogleGenAI({ apiKey: config.geminiApiKey })
+    const httpOptions = config.geminiBaseUrl ? { baseUrl: config.geminiBaseUrl } : undefined
+    const ai = new GoogleGenAI({ apiKey: config.geminiApiKey, httpOptions })
 
     const isDuskvol = body.publication === 'DUSKVOL'
 
