@@ -228,7 +228,7 @@ function renderMdInline(text: string) {
               <p class="text-xs font-serif text-justify leading-relaxed columns-2 gap-4 line-clamp-4">{{ data.frontPage.column1.content }}</p>
             </div>
           </div>
-          <div class="flex flex-col justify-between overflow-hidden">
+          <div class="flex flex-col gap-6 overflow-hidden">
             <div
               class="flex-1 relative cursor-pointer"
               :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('frontPage.column2') }"
