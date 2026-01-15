@@ -2,12 +2,14 @@ export enum ThemeType {
     CLASSIC_RED = 'CLASSIC_RED',
     DEEP_BLUE = 'DEEP_BLUE',
     EMERALD = 'EMERALD',
-    NOIR = 'NOIR'
+    NOIR = 'NOIR',
+    PARCHMENT = 'PARCHMENT'
 }
 
 export enum PublicationType {
     TRIANGLE = 'TRIANGLE',
-    DUSKVOL = 'DUSKVOL'
+    DUSKVOL = 'DUSKVOL',
+    ADVENTURER = 'ADVENTURER'
 }
 
 export interface FrontPageData {

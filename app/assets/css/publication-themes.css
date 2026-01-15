@@ -110,6 +110,57 @@
     --shadow-xl: 0 30px 60px -15px var(--shadow);
 }
 
+/* Adventurer Guild - Parchment theme with fantasy aesthetic */
+[data-publication="adventurer"] {
+    /* Colors */
+    --bg-primary: #f5f5dc;
+    /* beige */
+    --bg-secondary: #e8e4c9;
+    /* darker beige */
+    --bg-header: #e8e4c9;
+    --text-primary: #4a3728;
+    /* dark brown */
+    --text-secondary: #8b5a2b;
+    /* lighter brown */
+    --accent: #8b4513;
+    /* saddle brown */
+    --accent-hover: #a0522d;
+    /* sienna */
+    --border: #d2b48c;
+    /* tan */
+    --shadow: rgba(74, 55, 40, 0.2);
+    --fold-from: #d2b48c;
+    --fold-via: #e8e4c9;
+    --fold-to: #d2b48c;
+    --download-bg: #4a3728;
+    --download-hover: #2f2218;
+
+    /* Layout & Spacing */
+    --page-padding: 2rem;
+    --header-height: 4rem;
+    --gap-lg: 3rem;
+    --gap-md: 1rem;
+    --gap-sm: 0.5rem;
+
+    /* Typography */
+    --font-title: 'serif';
+    --font-body: 'serif';
+    --font-size-title: 1.25rem;
+    --font-size-meta: 0.75rem;
+    --font-size-btn: 0.75rem;
+    --letter-spacing-title: 0.05em;
+
+    /* Borders & Radius */
+    --border-width: 2px;
+    --border-radius: 0.5rem;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px var(--shadow);
+    --shadow-md: 0 4px 6px var(--shadow);
+    --shadow-lg: 0 10px 15px var(--shadow);
+    --shadow-xl: 0 25px 50px -12px var(--shadow);
+}
+
 /* Viewer layout utilities using CSS variables */
 .viewer-page {
     min-height: 100vh;

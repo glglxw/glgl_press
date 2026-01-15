@@ -1,6 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai"
 
-type PublicationType = 'TRIANGLE' | 'DUSKVOL'
+type PublicationType = 'TRIANGLE' | 'DUSKVOL' | 'ADVENTURER'
 
 interface NewsData {
     date: string
@@ -153,6 +153,37 @@ IMPORTANT: All text MUST BE IN SIMPLIFIED CHINESE (简体中文), except mainIma
 3. **Culture Section (~200 words):** Review of underground theater, spirit seances, or criminal entertainment.
 4. **Horoscope:** Dark prophecy or ominous wisdom for the day.
 `
+    } else if (body.publication === 'ADVENTURER') {
+        // ===== ADVENTURER GUILD PROMPT =====
+        prompt = `
+You are the Guildmaster's Scribe of the "Adventurer's Guild Daily (冒险者公会日报)", a parchment newsletter pinned to the quest board in a bustling fantasy metropolis (like Waterdeep or Baldur's Gate).
+    
+Generate a **TWO-PAGE** fantasy newsletter based on Topic: "${body.topic}"
+Date: "${body.date}"
+Visual Theme: "${body.theme}"
+
+IMPORTANT: All text MUST BE IN SIMPLIFIED CHINESE (简体中文), except mainImagePrompt.
+
+**TONE & STYLE:**
+- Energetic, heroic, rustic, and practical
+- Use D&D / TTRPG terminology (quests, loot, XP, monsters, dungeons)
+- Tone roughly between a tavern rumor and an official royal decree
+- Call the readers "Adventurers" or "Heroes"
+
+**PAGE 1 - THE QUEST BOARD:**
+1. **Headline & Main Story (~300 words):** Report on "${body.topic}" as a major world event, monster sighting, or magical phenomenon.
+2. **"Tavern Rumors" (News Snippets, 3 items):** Short rumors about dungeons opening, dragons sleeping, or kings missing.
+3. **"Bounty Board" (Column 1):** Urgent quest descriptions related to the topic.
+4. **"Guild Decree" (Column 2):** Official announcements from the Guildmaster regarding safety or rules.
+5. **"Monster Guide" (Weird News):** Description of a specific monster related to the topic, highlighting its weakness.
+6. **mainImagePrompt (ENGLISH):** Detailed fantasy oil painting style. Keywords: "Dungeons and Dragons style", "Fantasy Art", "Detailed background", "Epic lighting", "Scroll texture overlay", representation of ${body.topic}.
+
+**PAGE 2 - THE BACK ROOM:**
+1. **"Hero of the Week" (Editorial, ~300 words):** A spotlight on an adventurer or party who accomplished a feat related to "${body.topic}".
+2. **"Looking For Party" (Classifieds, 4-5 ads):** "Lvl 5 Cleric needed", "Selling +1 Sword", "Buying Dragon Scales", "Dungeon run looking for tank".
+3. **"Market Watch" (Culture, ~200 words):** Prices of health potions, mana crystals, or mithril ingots. Market analysis.
+4. **"The Oracle" (Horoscope):** Cryptic prophecy from the Guild Seer.
+`
     } else {
         // ===== TRIANGLE DAILY PROMPT =====
         prompt = `
@@ -186,6 +217,7 @@ IMPORTANT: All text MUST BE IN SIMPLIFIED CHINESE (简体中文), except mainIma
 4. **"Productivity Forecast" (Horoscope):** Use Geometric Shapes instead of zodiac (e.g., "Those aligned with The Isosceles..."). Give advice on work efficiency and avoiding "unauthorized thoughts."
 `
     }
+
 
     try {
         console.log('[API /generate/content] Calling Gemini API...')

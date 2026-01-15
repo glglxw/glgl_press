@@ -1,5 +1,5 @@
 import { ThemeType, PublicationType, type NewsData } from '~/types'
-import { Lock, Ghost } from 'lucide-vue-next'
+import { Lock, Ghost, Scroll } from 'lucide-vue-next'
 import type { Component } from 'vue'
 
 export interface EditorConfig {
@@ -69,6 +69,34 @@ const DUSKVOL_BLANK_TEMPLATE: NewsData = {
     }
 }
 
+const ADVENTURER_BLANK_TEMPLATE: NewsData = {
+    date: new Date().toISOString().split('T')[0] as string,
+    location: '无冬城',
+    frontPage: {
+        headline: '点击编辑今日头条',
+        mainStory: '在此输入主要新闻内容，例如巨龙袭击或新的地下城发现...',
+        mainImagePrompt: 'Fantasy adventurer guild hall, bustling with activity, detailed painting',
+        newsSnippets: [
+            { title: '酒馆传闻 1', content: '点击编辑传闻...' },
+            { title: '酒馆传闻 2', content: '点击编辑传闻...' },
+            { title: '酒馆传闻 3', content: '点击编辑传闻...' }
+        ],
+        column1: { title: '悬赏任务', content: '点击编辑任务详情...' },
+        column2: { title: '公会公告', content: '点击编辑公告内容...' },
+        weirdNews: { title: '怪物图鉴', content: '点击编辑怪物信息...' }
+    },
+    secondPage: {
+        editorial: { title: '每周之星', content: '点击编辑优秀冒险者事迹...' },
+        culture: { title: '装备行情', content: '点击编辑市场价格...' },
+        classifieds: [
+            { title: '组队招募 1', content: '点击编辑招募信息...' },
+            { title: '组队招募 2', content: '点击编辑招募信息...' },
+            { title: '组队招募 3', content: '点击编辑招募信息...' }
+        ],
+        horoscope: '点击编辑今日运势...'
+    }
+}
+
 export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
     TRIANGLE: {
         publicationType: PublicationType.TRIANGLE,
@@ -89,6 +117,16 @@ export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
         emptyStateText: 'The printing press awaits...',
         isDark: true,
         blankTemplate: DUSKVOL_BLANK_TEMPLATE
+    },
+    ADVENTURER: {
+        publicationType: PublicationType.ADVENTURER,
+        defaultTheme: ThemeType.PARCHMENT,
+        icon: Scroll,
+        title: '冒险者工会日报',
+        subtitle: 'Adventurer Guild • Daily Report',
+        emptyStateText: '羊皮纸准备就绪...',
+        isDark: false,
+        blankTemplate: ADVENTURER_BLANK_TEMPLATE
     }
 }
 
