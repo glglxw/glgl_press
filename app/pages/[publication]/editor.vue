@@ -74,23 +74,21 @@ const state = reactive({
 <template>
   <div 
     class="flex flex-col md:flex-row h-screen" 
-    :class="config.isDark ? 'bg-stone-900' : 'bg-stone-100'"
-    :data-theme="config.isDark ? 'dark' : 'light'"
+    :class="config.styles.editorBg"
+    :data-theme="config.styles.themeKey"
   >
     <!-- Sidebar Controls -->
     <div 
       class="w-full md:w-96 shadow-xl flex flex-col z-20 border-r h-full relative"
-      :class="config.isDark 
-        ? 'bg-stone-800 border-stone-700 text-stone-200' 
-        : 'bg-white border-stone-200'"
+      :class="config.styles.sidebar"
     >
-      <div class="p-6 pb-4 border-b" :class="config.isDark ? 'border-stone-700' : 'border-stone-100'">
+      <div class="p-6 pb-4 border-b" :class="config.styles.sidebarBorder">
         <h2 class="text-2xl font-black uppercase tracking-tighter flex items-center gap-2"
-            :class="config.isDark ? 'text-stone-100' : 'text-stone-800'">
+            :class="config.styles.sidebarTitle">
           <component :is="config.icon" class="w-5 h-5" />
           {{ t(`publication.${publication}.editor.title`) }}
         </h2>
-        <p class="text-xs font-serif" :class="config.isDark ? 'text-stone-400 italic' : 'text-stone-500'">
+        <p class="text-xs font-serif" :class="config.styles.sidebarSubtitle">
           {{ t(`publication.${publication}.editor.subtitle`) }}
         </p>
       </div>
@@ -122,11 +120,11 @@ const state = reactive({
     <!-- Preview Area -->
     <div 
       class="flex-1 p-8 overflow-auto flex flex-col items-center justify-center"
-      :class="config.isDark ? 'bg-stone-950' : 'bg-stone-200'"
+      :class="config.styles.previewArea"
       @click="selectedPath = null"
     >
       <div v-if="!previewContent" class="flex-1 flex flex-col items-center justify-center gap-4"
-           :class="config.isDark ? 'text-stone-600' : 'text-stone-400'">
+           :class="config.styles.previewText">
         <component :is="config.icon" class="w-16 h-16 opacity-20" />
         <p class="font-serif" :class="config.isDark ? 'italic' : ''">{{ t(`publication.${publication}.editor.emptyState`) }}</p>
       </div>
@@ -149,9 +147,7 @@ const state = reactive({
           <!-- Center fold effect -->
           <div 
             class="w-2 shadow-inner"
-            :class="config.isDark 
-              ? 'bg-gradient-to-r from-stone-700 via-stone-800 to-stone-700' 
-              : 'bg-gradient-to-r from-stone-400 via-stone-300 to-stone-400'"
+            :class="config.styles.centerFold"
           ></div>
 
           <!-- Page 2 (Right) -->
@@ -277,5 +273,110 @@ const state = reactive({
 }
 [data-theme="dark"] :deep(#tip-box) {
     @apply bg-stone-700/50 text-stone-500 border-stone-700;
+}
+
+/* Parchment theme overrides for Adventurer */
+[data-theme="parchment"] :deep(#welcome-message) {
+    @apply bg-[#d9cdb8] border-[#c4a97a] text-[#5c4033];
+}
+[data-theme="parchment"] :deep(.input-label) {
+    @apply text-[#8b5a2b];
+}
+[data-theme="parchment"] :deep(.topic-input),
+[data-theme="parchment"] :deep(.date-input) {
+    @apply bg-[#fdfbf7] border-[#d2b48c] focus:border-[#8b5a2b] text-[#5c4033];
+}
+[data-theme="parchment"] :deep(#btn-generate) {
+    @apply bg-[#8b4513] hover:bg-[#654321] shadow-[4px_4px_0px_0px_#c4a97a];
+}
+[data-theme="parchment"] :deep(#btn-manual) {
+    @apply text-[#8b5a2b] border-[#d2b48c] hover:bg-[#d9cdb8];
+}
+[data-theme="parchment"] :deep(#history-section) {
+    @apply border-[#d2b48c];
+}
+[data-theme="parchment"] :deep(.history-title) {
+    @apply text-[#8b5a2b];
+}
+[data-theme="parchment"] :deep(.issue-item) {
+    @apply bg-[#fdfbf7] hover:bg-[#e6dcc3] border-[#d2b48c];
+}
+[data-theme="parchment"] :deep(.issue-headline) {
+    @apply text-[#5c4033];
+}
+[data-theme="parchment"] :deep(.issue-date) {
+    @apply text-[#8b5a2b];
+}
+[data-theme="parchment"] :deep(.issue-time) {
+    @apply bg-[#e6dcc3] text-[#8b5a2b];
+}
+[data-theme="parchment"] :deep(.empty-msg) {
+    @apply text-[#8b5a2b];
+}
+
+/* Dashboard Overrides - Parchment */
+[data-theme="parchment"] :deep(#interactive-mode-banner) {
+    @apply bg-[#d9cdb8] border-[#c4a97a] text-[#5c4033];
+}
+[data-theme="parchment"] :deep(#global-actions) {
+    @apply border-[#d2b48c];
+}
+[data-theme="parchment"] :deep(.section-title) {
+    @apply text-[#8b5a2b];
+}
+[data-theme="parchment"] :deep(#btn-reset),
+[data-theme="parchment"] :deep(#btn-back) {
+    @apply border-[#d2b48c] text-[#8b5a2b] hover:bg-[#d9cdb8];
+}
+[data-theme="parchment"] :deep(#btn-save) {
+    @apply text-[#5c4033] border-[#d2b48c] hover:bg-[#d9cdb8];
+}
+[data-theme="parchment"] :deep(#btn-publish) {
+    @apply bg-[#8b4513] hover:bg-[#654321] shadow-[4px_4px_0px_0px_#c4a97a];
+}
+
+/* Edit Panel Overrides - Parchment */
+[data-theme="parchment"] :deep(#btn-quick-save) {
+    @apply text-[#8b5a2b] hover:text-[#5c4033] border-[#d2b48c] bg-[#fdfbf7];
+}
+[data-theme="parchment"] :deep(#section-indicator) {
+    @apply border-[#d2b48c];
+}
+[data-theme="parchment"] :deep(.indicator-dot) {
+    @apply bg-[#8b4513];
+}
+[data-theme="parchment"] :deep(.indicator-text) {
+    @apply text-[#8b4513];
+}
+[data-theme="parchment"] :deep(#layout-control) {
+    @apply bg-[#d9cdb8]/50 border-[#d2b48c];
+}
+[data-theme="parchment"] :deep(.layout-header label) {
+    @apply text-[#8b5a2b];
+}
+[data-theme="parchment"] :deep(.layout-header button) {
+    @apply text-[#8b4513] hover:text-[#654321];
+}
+[data-theme="parchment"] :deep(.range-slider) {
+    @apply bg-[#d2b48c];
+}
+[data-theme="parchment"] :deep(.field-group label) {
+    @apply text-[#8b5a2b];
+}
+[data-theme="parchment"] :deep(.text-input),
+[data-theme="parchment"] :deep(.text-area) {
+    @apply bg-[#fdfbf7] border-[#d2b48c] text-[#5c4033];
+}
+[data-theme="parchment"] :deep(.upload-box) {
+    @apply bg-[#d9cdb8] hover:bg-[#c4a97a] border-[#8b5a2b] text-[#5c4033];
+}
+[data-theme="parchment"] :deep(.ai-input-group input) {
+    @apply bg-[#fdfbf7] border-[#d2b48c] text-[#5c4033];
+}
+[data-theme="parchment"] :deep(.ai-input-group button) {
+    @apply bg-[#8b5a2b] hover:bg-[#654321];
+}
+[data-theme="parchment"] :deep(#tip-box) {
+    @apply bg-[#d9cdb8]/50 text-[#8b5a2b] border-[#d2b48c];
 }
 </style>

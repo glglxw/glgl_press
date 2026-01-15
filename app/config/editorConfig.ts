@@ -2,6 +2,35 @@ import { ThemeType, PublicationType, type NewsData } from '~/types'
 import { Lock, Ghost, Scroll } from 'lucide-vue-next'
 import type { Component } from 'vue'
 
+export interface PublicationStyles {
+    // Reader page
+    pageBg: string
+    pageText: string
+    loadingState: string
+    header: string
+    headerText: string
+    headerButton: string
+    archiveDrawer: string
+    archiveHeader: string
+    archiveList: string
+    archiveItem: string
+    archiveItemActive: string
+    archiveItemHover: string
+    centerFold: string
+    editorLink: string
+    primaryButton: string
+    secondaryButton: string
+    // Editor page
+    editorBg: string
+    sidebar: string
+    sidebarBorder: string
+    sidebarTitle: string
+    sidebarSubtitle: string
+    previewArea: string
+    previewText: string
+    themeKey: 'light' | 'dark' | 'parchment'
+}
+
 export interface EditorConfig {
     publicationType: PublicationType
     defaultTheme: ThemeType
@@ -11,6 +40,7 @@ export interface EditorConfig {
     emptyStateText: string
     isDark: boolean
     blankTemplate: NewsData
+    styles: PublicationStyles
 }
 
 const TRIANGLE_BLANK_TEMPLATE: NewsData = {
@@ -106,7 +136,34 @@ export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
         subtitle: 'Triangle CMS v4.0 • Nuxt Edition',
         emptyStateText: '在此处预览生成的新闻日报',
         isDark: false,
-        blankTemplate: TRIANGLE_BLANK_TEMPLATE
+        blankTemplate: TRIANGLE_BLANK_TEMPLATE,
+        styles: {
+            pageBg: 'bg-stone-200',
+            pageText: 'text-stone-500',
+            loadingState: 'bg-stone-100 text-stone-500',
+            header: 'bg-white',
+            headerText: 'text-red-600',
+            headerButton: 'hover:bg-stone-100 text-stone-400 hover:text-stone-800',
+            archiveDrawer: 'bg-stone-100 border-stone-200',
+            archiveHeader: 'border-stone-200 bg-white text-red-600',
+            archiveList: 'bg-stone-50',
+            archiveItem: 'bg-white border-stone-200 text-stone-800',
+            archiveItemActive: 'border-red-500 ring-1 ring-red-500',
+            archiveItemHover: 'hover:bg-red-50 hover:border-red-200 hover:text-red-700',
+            centerFold: 'bg-gradient-to-r from-stone-400 via-stone-300 to-stone-400',
+            editorLink: 'bg-black',
+            primaryButton: 'bg-red-600 hover:bg-red-700',
+            secondaryButton: 'bg-stone-800 hover:bg-black',
+            // Editor
+            editorBg: 'bg-stone-100',
+            sidebar: 'bg-white border-stone-200 text-stone-800',
+            sidebarBorder: 'border-stone-100',
+            sidebarTitle: 'text-stone-800',
+            sidebarSubtitle: 'text-stone-500',
+            previewArea: 'bg-stone-200',
+            previewText: 'text-stone-400',
+            themeKey: 'light'
+        }
     },
     DUSKVOL: {
         publicationType: PublicationType.DUSKVOL,
@@ -116,7 +173,34 @@ export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
         subtitle: 'Duskvol Chronicle • Printing Press',
         emptyStateText: 'The printing press awaits...',
         isDark: true,
-        blankTemplate: DUSKVOL_BLANK_TEMPLATE
+        blankTemplate: DUSKVOL_BLANK_TEMPLATE,
+        styles: {
+            pageBg: 'bg-stone-900',
+            pageText: 'text-stone-400',
+            loadingState: 'bg-stone-900 text-stone-400',
+            header: 'bg-stone-800 text-stone-200',
+            headerText: 'text-stone-100',
+            headerButton: 'hover:bg-stone-700 text-stone-400 hover:text-stone-200',
+            archiveDrawer: 'bg-stone-900 border-stone-800',
+            archiveHeader: 'border-stone-800 text-stone-400',
+            archiveList: '',
+            archiveItem: 'bg-stone-800/50 border-stone-800 text-stone-300',
+            archiveItemActive: 'border-blue-500/50 bg-blue-900/10',
+            archiveItemHover: 'hover:bg-stone-800 hover:border-stone-700 hover:text-white',
+            centerFold: 'bg-gradient-to-r from-stone-700 via-stone-800 to-stone-700',
+            editorLink: 'bg-stone-700',
+            primaryButton: 'bg-blue-900 hover:bg-blue-800',
+            secondaryButton: 'bg-stone-700 hover:bg-stone-600',
+            // Editor
+            editorBg: 'bg-stone-900',
+            sidebar: 'bg-stone-800 border-stone-700 text-stone-200',
+            sidebarBorder: 'border-stone-700',
+            sidebarTitle: 'text-stone-100',
+            sidebarSubtitle: 'text-stone-400 italic',
+            previewArea: 'bg-stone-950',
+            previewText: 'text-stone-600',
+            themeKey: 'dark'
+        }
     },
     ADVENTURER: {
         publicationType: PublicationType.ADVENTURER,
@@ -126,7 +210,34 @@ export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
         subtitle: 'Adventurer Guild • Daily Report',
         emptyStateText: '羊皮纸准备就绪...',
         isDark: false,
-        blankTemplate: ADVENTURER_BLANK_TEMPLATE
+        blankTemplate: ADVENTURER_BLANK_TEMPLATE,
+        styles: {
+            pageBg: 'bg-[#f0e6d2]',
+            pageText: 'text-[#5c4033]',
+            loadingState: 'bg-[#f0e6d2] text-[#8b5a2b]',
+            header: 'bg-[#e6dcc3] border-b border-[#d2b48c]',
+            headerText: 'text-[#4a3728]',
+            headerButton: 'text-[#8b5a2b] hover:bg-[#d2b48c]/30 hover:text-[#5c4033]',
+            archiveDrawer: 'bg-[#f0e6d2] border-[#d2b48c]',
+            archiveHeader: 'border-[#d2b48c] bg-[#e6dcc3] text-[#4a3728]',
+            archiveList: 'bg-[#f0e6d2]',
+            archiveItem: 'bg-[#fdfbf7] border-[#d2b48c] text-[#5c4033]',
+            archiveItemActive: 'border-[#8b5a2b] ring-1 ring-[#8b5a2b] bg-[#e6dcc3]',
+            archiveItemHover: 'hover:bg-[#e6dcc3] hover:border-[#8b5a2b] hover:text-[#4a3728]',
+            centerFold: 'bg-gradient-to-r from-[#d2b48c] via-[#e6dcc3] to-[#d2b48c]',
+            editorLink: 'bg-[#4a3728]',
+            primaryButton: 'bg-[#8b4513] hover:bg-[#654321]',
+            secondaryButton: 'bg-[#8b5a2b] hover:bg-[#654321]',
+            // Editor
+            editorBg: 'bg-[#f0e6d2]',
+            sidebar: 'bg-[#e6dcc3] border-[#d2b48c] text-[#5c4033]',
+            sidebarBorder: 'border-[#d2b48c]',
+            sidebarTitle: 'text-[#4a3728]',
+            sidebarSubtitle: 'text-[#8b5a2b] italic',
+            previewArea: 'bg-[#d9cdb8]',
+            previewText: 'text-[#8b5a2b]',
+            themeKey: 'parchment'
+        }
     }
 }
 
