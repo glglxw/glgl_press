@@ -7,7 +7,6 @@ describe('EDITOR_CONFIGS', () => {
         const config = EDITOR_CONFIGS.TRIANGLE
         expect(config.publicationType).toBe(PublicationType.TRIANGLE)
         expect(config.defaultTheme).toBe(ThemeType.CLASSIC_RED)
-        expect(config.showThemeSelector).toBe(true)
         expect(config.isDark).toBe(false)
         expect(config.title).toBe('三角日报编辑器')
     })
@@ -16,7 +15,6 @@ describe('EDITOR_CONFIGS', () => {
         const config = EDITOR_CONFIGS.DUSKVOL
         expect(config.publicationType).toBe(PublicationType.DUSKVOL)
         expect(config.defaultTheme).toBe(ThemeType.NOIR)
-        expect(config.showThemeSelector).toBe(false)
         expect(config.isDark).toBe(true)
         expect(config.title).toBe('The Press Room')
     })

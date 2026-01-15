@@ -6,7 +6,7 @@ import { BookOpen, Printer } from 'lucide-vue-next'
   <div class="min-h-screen bg-gradient-to-br from-stone-900 via-stone-800 to-stone-900 flex flex-col items-center justify-center p-8">
     <div class="text-center mb-16">
       <h1 class="text-6xl font-black text-white mb-4 tracking-tight">
-        新闻生成系统
+        咕噜咕噜日报生成系统
       </h1>
       <p class="text-stone-400 text-lg font-serif">
         选择您要访问的刊物
@@ -78,7 +78,7 @@ import { BookOpen, Printer } from 'lucide-vue-next'
     </div>
 
     <div class="mt-16 text-center text-stone-500 text-sm">
-      <p>Powered by Gemini AI • Triangle Agency © 2024</p>
+      <p>咕噜咕噜小屋 © 2026</p>
     </div>
   </div>
 </template>

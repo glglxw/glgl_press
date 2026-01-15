@@ -5,7 +5,6 @@ import type { Component } from 'vue'
 export interface EditorConfig {
     publicationType: PublicationType
     defaultTheme: ThemeType
-    showThemeSelector: boolean
     icon: Component
     title: string
     subtitle: string
@@ -74,7 +73,6 @@ export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
     TRIANGLE: {
         publicationType: PublicationType.TRIANGLE,
         defaultTheme: ThemeType.CLASSIC_RED,
-        showThemeSelector: true,
         icon: Lock,
         title: '三角日报编辑器',
         subtitle: 'Triangle CMS v4.0 • Nuxt Edition',
@@ -85,7 +83,6 @@ export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
     DUSKVOL: {
         publicationType: PublicationType.DUSKVOL,
         defaultTheme: ThemeType.NOIR,
-        showThemeSelector: false,
         icon: Ghost,
         title: 'The Press Room',
         subtitle: 'Duskvol Chronicle • Printing Press',

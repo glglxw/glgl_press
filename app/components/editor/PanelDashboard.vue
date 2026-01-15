@@ -3,12 +3,15 @@ import {
   Undo2, Save, Loader2 
 } from 'lucide-vue-next'
 
+const { t } = useI18n()
+
 interface EditorControl {
   previewContent: any
   isSaving: any
   isPublishing: any
   handleSaveDraft: () => Promise<boolean>
   handlePublish: () => Promise<boolean>
+  handleReset?: () => void
 }
 
 const props = defineProps<{
@@ -19,17 +22,17 @@ const props = defineProps<{
 <template>
   <div id="panel-dashboard" class="animate-in slide-in-from-left-4 duration-300">
     <div id="interactive-mode-banner">
-      <h3 class="banner-title"> Interactive Mode</h3>
-      <p>Click sections in the preview to edit.</p>
+      <h3 class="banner-title">{{ t('editor.interactiveMode') }}</h3>
+      <p>{{ t('editor.clickToEdit') }}</p>
     </div>
     
     <div id="global-actions">
-      <h3 class="section-title">Global Actions</h3>
+      <h3 class="section-title">{{ t('editor.globalActions') }}</h3>
       <button 
         @click="control.handleReset ? control.handleReset() : (control.previewContent = null)"
-        id="btn-reset"
+        id="btn-back"
       >
-        <Undo2 class="w-3 h-3" /> Back
+        <span class="btn-content"><Undo2 class="w-4 h-4" /> {{ t('editor.back') }}</span>
       </button>
       
       <button
@@ -37,8 +40,8 @@ const props = defineProps<{
         :disabled="control.isSaving"
         id="btn-save"
       >
-          <span v-if="control.isSaving" class="btn-content"><Loader2 class="animate-spin w-4 h-4" /> Saving...</span>
-          <span v-else class="btn-content"><Save class="w-4 h-4" /> Save Draft</span>
+          <span v-if="control.isSaving" class="btn-content"><Loader2 class="animate-spin w-4 h-4" /> {{ t('editor.saving') }}</span>
+          <span v-else class="btn-content"><Save class="w-4 h-4" /> {{ t('editor.saveDraft') }}</span>
       </button>
 
       <button
@@ -46,8 +49,8 @@ const props = defineProps<{
         :disabled="control.isPublishing"
         id="btn-publish"
       >
-        <span v-if="control.isPublishing" class="btn-content"><Loader2 class="animate-spin w-4 h-4" /> Publishing...</span>
-        <span v-else class="btn-content"><Save class="w-4 h-4" /> Publish Now</span>
+        <span v-if="control.isPublishing" class="btn-content"><Loader2 class="animate-spin w-4 h-4" /> {{ t('editor.publishing') }}</span>
+        <span v-else class="btn-content"><Save class="w-4 h-4" /> {{ t('editor.publish') }}</span>
       </button>
     </div>
   </div>
@@ -74,8 +77,8 @@ const props = defineProps<{
     @apply text-xs font-bold uppercase text-stone-400;
 }
 
-#btn-reset {
-    @apply w-full py-2 border border-stone-300 text-stone-600 text-xs font-bold hover:bg-stone-50 flex items-center justify-center gap-2 transition-colors;
+#btn-back {
+    @apply w-full py-3 border border-stone-300 text-stone-600 font-bold hover:bg-stone-50 flex items-center justify-center gap-2 transition-colors;
 }
 
 #btn-save {

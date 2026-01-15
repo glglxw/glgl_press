@@ -151,54 +151,6 @@ export function useNewsEditor(publicationType: PublicationType) {
         }
     }
 
-    function updateScale(scale: number) {
-        if (!previewContent.value || !selectedPath.value) return
-
-        let target = getValue(selectedPath.value)
-
-        // If target is primitive (e.g. string content), try to apply scale to parent
-        if (typeof target !== 'object' || target === null) {
-            const keys = selectedPath.value.split('.')
-            keys.pop() // remove property name
-            if (keys.length > 0) {
-                // Traverse to parent
-                let current: any = previewContent.value.textData
-                for (const k of keys) {
-                    if (current === undefined) return
-                    current = current[k]
-                }
-                // Set scale on parent (e.g. FrontPageData)
-                if (current) current.scale = scale
-            }
-        } else {
-            // Target is object (e.g. column1), set scale on it
-            target.scale = scale
-        }
-    }
-
-    function getScale(): number {
-        if (!previewContent.value || !selectedPath.value) return 1
-
-        let target = getValue(selectedPath.value)
-        if (typeof target === 'object' && target !== null && typeof target.scale === 'number') {
-            return target.scale
-        }
-
-        // Check parent
-        const keys = selectedPath.value.split('.')
-        keys.pop()
-        if (keys.length > 0) {
-            let current: any = previewContent.value.textData
-            for (const k of keys) {
-                if (current === undefined) return 1
-                current = current[k]
-            }
-            if (current && typeof current.scale === 'number') return current.scale
-        }
-
-        return 1
-    }
-
 
     function handleSectionSelect(path: string, label: string) {
         if (!path) {
@@ -273,8 +225,6 @@ export function useNewsEditor(publicationType: PublicationType) {
         handleSelectIssue,
         getValue,
         updateTextData,
-        updateScale,
-        getScale,
         handleSectionSelect,
         handleSmartRewrite,
         handleImageUpload

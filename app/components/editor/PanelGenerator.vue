@@ -2,7 +2,8 @@
 import { 
   Layout, Loader2, Wand2, BookOpen, RefreshCw, Calendar 
 } from 'lucide-vue-next'
-import { ThemeType } from '~/types'
+
+const { t } = useI18n()
 
 interface EditorControl {
   topic: any
@@ -20,18 +21,10 @@ interface EditorControl {
 
 const props = defineProps<{
   control: EditorControl
-  showThemeSelector?: boolean
   publicationType?: 'TRIANGLE' | 'DUSKVOL'
 }>()
 
 const emit = defineEmits(['manual-create'])
-
-const THEME_NAMES: Record<ThemeType, string> = {
-  [ThemeType.CLASSIC_RED]: '经典赤红',
-  [ThemeType.DEEP_BLUE]: '深邃湛蓝',
-  [ThemeType.EMERALD]: '复古翡翠',
-  [ThemeType.NOIR]: '黑色电影'
-}
 
 function handleManualClick() {
     emit('manual-create')
@@ -41,41 +34,26 @@ function handleManualClick() {
 <template>
   <div id="panel-generator" class="space-y-4 animate-in fade-in duration-300">
     <div id="welcome-message">
-      <h3 class="welcome-title"><Layout class="w-4 h-4" /> Start Creation</h3>
-      <p>Enter a topic, and AI will generate the newspaper.</p>
+      <h3 class="welcome-title"><Layout class="w-4 h-4" /> {{ t('editor.startCreation') }}</h3>
+      <p>{{ t('editor.enterTopicHint') }}</p>
     </div>
     
     <div id="form-group-topic">
-      <label class="input-label">Topic / 主题</label>
+      <label class="input-label">{{ t('editor.topic') }}</label>
       <textarea 
         v-model="control.topic"
         class="topic-input"
-        placeholder="e.g. Life in 2050 Mars Colony..."
+        :placeholder="t('editor.topicPlaceholder')"
       />
     </div>
 
     <div id="form-group-date">
-      <label class="input-label">Date / 日期</label>
+      <label class="input-label">{{ t('editor.date') }}</label>
       <input 
         type="date" 
         v-model="control.date"
         class="date-input"
       />
-    </div>
-
-    <!-- Theme Selector (Optional) -->
-    <div v-if="showThemeSelector" id="form-group-theme">
-      <label class="input-label">Theme / 配色</label>
-      <div class="theme-grid">
-        <button
-          v-for="t in Object.values(ThemeType)" :key="t"
-          @click="control.theme = t"
-          class="theme-btn"
-          :class="control.theme === t ? 'theme-btn-active' : 'theme-btn-inactive'"
-        >
-          {{ THEME_NAMES[t] }}
-        </button>
-      </div>
     </div>
 
     <button
@@ -84,10 +62,10 @@ function handleManualClick() {
       id="btn-generate"
     >
       <span v-if="control.loading" class="btn-content">
-        <Loader2 class="animate-spin w-4 h-4" /> {{ control.loadingStep || 'Generating...' }}
+        <Loader2 class="animate-spin w-4 h-4" /> {{ control.loadingStep || t('editor.generating') }}
       </span>
       <span v-else class="btn-content">
-        <Wand2 class="w-4 h-4" /> AI Generate Preview
+        <Wand2 class="w-4 h-4" /> {{ t('editor.generate') }}
       </span>
     </button>
 
@@ -96,22 +74,22 @@ function handleManualClick() {
       id="btn-manual"
     >
       <span class="btn-content">
-        <Layout class="w-4 h-4" /> Manual Blank Template
+        <Layout class="w-4 h-4" /> {{ t('editor.manual') }}
       </span>
     </button>
 
     <!-- History List -->
     <div id="history-section">
        <div class="history-header">
-         <h3 class="history-title">Previous Chronicles</h3>
-         <button @click="control.loadIssueList" class="btn-refresh" title="Refresh">
+         <h3 class="history-title">{{ t('editor.previousIssues') }}</h3>
+         <button @click="control.loadIssueList" class="btn-refresh" :title="t('editor.refresh')">
            <RefreshCw class="w-3 h-3" :class="{ 'animate-spin': control.loadingIssues }" />
          </button>
        </div>
        
        <div id="issue-list">
          <div v-if="control.allIssues.length === 0 && !control.loadingIssues" class="empty-msg">
-           No archives found.
+           {{ t('editor.noArchives') }}
          </div>
          <button
            v-for="issue in control.allIssues"
@@ -127,7 +105,7 @@ function handleManualClick() {
                class="issue-status"
                :class="issue.status === 'draft' ? 'status-draft' : 'status-published'"
              >
-               {{ issue.status === 'draft' ? '草稿' : '已发布' }}
+               {{ issue.status === 'draft' ? t('editor.draft') : t('editor.published') }}
              </span>
            </div>
            <h4 class="issue-headline">

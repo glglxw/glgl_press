@@ -3,6 +3,8 @@ import {
   ArrowLeft, Save, Loader2, Upload, Wand2 
 } from 'lucide-vue-next'
 
+const { t } = useI18n()
+
 interface EditorControl {
   selectedPath: any
   selectedLabel: any
@@ -15,8 +17,6 @@ interface EditorControl {
   handleSmartRewrite: (text: string) => Promise<string>
   handleImageUpload: (e: Event) => void
   handleSaveDraft: () => Promise<boolean>
-  updateScale: (val: number) => void
-  getScale: () => number
 }
 
 const props = defineProps<{
@@ -24,14 +24,7 @@ const props = defineProps<{
   publicationType?: 'TRIANGLE' | 'DUSKVOL'
 }>()
 
-const currentScale = computed({
-    get: () => props.control.getScale(),
-    set: (val: number) => props.control.updateScale(val)
-})
-
 const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
-
-// Helper to avoid prop drilling for big objects if not needed, but here we just use control
 </script>
 
 <template>
@@ -41,7 +34,7 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
             @click="control.selectedPath = null"
             id="btn-back"
         >
-            <ArrowLeft class="w-3 h-3" /> Back
+            <ArrowLeft class="w-3 h-3" /> {{ t('editor.back') }}
         </button>
           <button
             @click="control.handleSaveDraft"
@@ -50,7 +43,7 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
             >
             <Save v-if="!control.isSaving" class="w-3 h-3" />
             <Loader2 v-else class="w-3 h-3 animate-spin" />
-            Save
+            {{ t('editor.save') }}
         </button>
     </div>
 
@@ -61,26 +54,10 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
       </h3>
     </div>
 
-    <!-- Typography Control -->
-    <div id="layout-control">
-        <div class="layout-header">
-            <label>Layout Weight: {{ currentScale.toFixed(1) }}</label>
-            <button @click="currentScale = 1" title="Reset Size">Reset</button>
-        </div>
-        <input 
-            type="range" 
-            v-model.number="currentScale" 
-            min="0.5" 
-            max="2.0" 
-            step="0.1"
-            class="range-slider"
-        >
-    </div>
-
 
     <!-- Date Editor -->
     <div v-if="control.selectedPath === 'date'" class="field-group">
-      <label>Date</label>
+      <label>{{ t('editor.date') }}</label>
       <input 
         class="text-input" 
         :value="control.previewContent?.textData.date" 
@@ -90,13 +67,13 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
 
     <!-- Image Upload -->
     <div v-else-if="control.selectedPath === 'image'" class="field-group">
-      <label>Main Image</label>
+      <label>{{ t('editor.mainImage') }}</label>
       <label class="upload-box">
         <input type="file" class="hidden" accept="image/*" @change="control.handleImageUpload" />
         <Upload class="w-6 h-6" /> 
-        <span>Upload new image</span>
+        <span>{{ t('editor.uploadImage') }}</span>
       </label>
-      <p v-if="!isDuskvol" class="help-text">目前暂不支持 AI 局部重绘图片，请上传本地图片替代。</p>
+      <p v-if="!isDuskvol" class="help-text">{{ t('editor.uploadHint') }}</p>
     </div>
 
     <!-- Object Editor -->
@@ -104,7 +81,7 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
       <div v-if="control.getValue(control.selectedPath) && typeof control.getValue(control.selectedPath) === 'object'" class="space-y-6">
         <!-- Title -->
         <div class="field-group">
-          <label>Title</label>
+          <label>{{ t('editor.title') }}</label>
           <input 
             class="text-input font-bold" 
             :value="control.getValue(control.selectedPath).title" 
@@ -113,12 +90,12 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
           <div class="ai-input-group">
             <input 
               type="text" 
-              placeholder="AI instruction..." 
+              :placeholder="t('editor.aiInstruction')" 
               v-model="control.rewritePrompt"
-              @keydown.enter="async () => { const t = await control.handleSmartRewrite(control.getValue(control.selectedPath!).title); control.updateTextData(control.selectedPath!, 'title', t) }"
+              @keydown.enter="async () => { const txt = await control.handleSmartRewrite(control.getValue(control.selectedPath!).title); control.updateTextData(control.selectedPath!, 'title', txt) }"
             />
             <button 
-              @click="async () => { const t = await control.handleSmartRewrite(control.getValue(control.selectedPath!).title); control.updateTextData(control.selectedPath!, 'title', t) }"
+              @click="async () => { const txt = await control.handleSmartRewrite(control.getValue(control.selectedPath!).title); control.updateTextData(control.selectedPath!, 'title', txt) }"
               :disabled="control.isRewriting || !control.rewritePrompt"
             >
               <Loader2 v-if="control.isRewriting" class="w-3 h-3 animate-spin" />
@@ -130,7 +107,7 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
         <!-- Content -->
         <div class="field-group">
           <div class="flex justify-between items-baseline">
-            <label>Content</label>
+            <label>{{ t('editor.content') }}</label>
             <div class="help-text-mono">MD: **bold** *italic* # Large</div>
           </div>
           <textarea 
@@ -141,12 +118,12 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
           <div class="ai-input-group">
             <input 
               type="text" 
-              placeholder="AI instruction..." 
+              :placeholder="t('editor.aiInstruction')" 
               v-model="control.rewritePrompt"
-              @keydown.enter="async () => { const t = await control.handleSmartRewrite(control.getValue(control.selectedPath!).content); control.updateTextData(control.selectedPath!, 'content', t) }"
+              @keydown.enter="async () => { const txt = await control.handleSmartRewrite(control.getValue(control.selectedPath!).content); control.updateTextData(control.selectedPath!, 'content', txt) }"
             />
             <button 
-              @click="async () => { const t = await control.handleSmartRewrite(control.getValue(control.selectedPath!).content); control.updateTextData(control.selectedPath!, 'content', t) }"
+              @click="async () => { const txt = await control.handleSmartRewrite(control.getValue(control.selectedPath!).content); control.updateTextData(control.selectedPath!, 'content', txt) }"
               :disabled="control.isRewriting || !control.rewritePrompt"
             >
               <Loader2 v-if="control.isRewriting" class="w-3 h-3 animate-spin" />
@@ -159,7 +136,7 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
       <!-- String Editor -->
       <div v-else class="field-group">
         <div class="flex justify-between items-baseline">
-          <label>Text Content</label>
+          <label>{{ t('editor.textContent') }}</label>
           <div class="help-text-mono">MD: **bold** *italic*</div>
         </div>
         <textarea 
@@ -170,12 +147,12 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
         <div class="ai-input-group">
           <input 
             type="text" 
-            placeholder="AI instruction..." 
+            :placeholder="t('editor.aiInstruction')" 
             v-model="control.rewritePrompt"
-            @keydown.enter="async () => { const t = await control.handleSmartRewrite(control.getValue(control.selectedPath!)); control.updateTextData(control.selectedPath!, null, t) }"
+            @keydown.enter="async () => { const txt = await control.handleSmartRewrite(control.getValue(control.selectedPath!)); control.updateTextData(control.selectedPath!, null, txt) }"
           />
           <button 
-            @click="async () => { const t = await control.handleSmartRewrite(control.getValue(control.selectedPath!)); control.updateTextData(control.selectedPath!, null, t) }"
+            @click="async () => { const txt = await control.handleSmartRewrite(control.getValue(control.selectedPath!)); control.updateTextData(control.selectedPath!, null, txt) }"
             :disabled="control.isRewriting || !control.rewritePrompt"
           >
             <Loader2 v-if="control.isRewriting" class="w-3 h-3 animate-spin" />
@@ -186,7 +163,7 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
     </template>
 
     <div id="tip-box">
-      Tips: Changes are reflected in real-time. Click outside to finish.
+      {{ t('editor.tipHint') }}
     </div>
   </div>
 </template>
@@ -283,11 +260,4 @@ const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')
 #tip-box {
     @apply p-3 bg-stone-50 text-[10px] text-stone-400 mt-8 rounded border border-stone-100;
 }
-
-/* Duskvol Overrides */
-/* We can use a class applied to the root if isDuskvol, or strict CSS variables. 
-   For now, since we are moving towards ID based, we can use specific overrides or scoped styles logic. 
-   However, strictly mapping "colors" via CSS classes might be cleaner if we want to support multiple themes easily.
-   Given the requirement, I'll stick to a clean base and maybe add a class for dusky mode.
-*/
 </style>

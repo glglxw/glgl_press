@@ -16,14 +16,10 @@ const {
     init, loadIssueList, createBlankTemplate, handleGenerate,
     handlePublish, handleSaveDraft, handleSelectIssue, getValue,
     updateTextData, handleSectionSelect, handleSmartRewrite,
-    handleImageUpload, updateScale, getScale
+    handleImageUpload
 } = useNewsEditor(config.value.publicationType)
 
-// UI specific ref for scale to bind to slider
-const currentScale = computed({
-    get: () => getScale(),
-    set: (val: number) => updateScale(val)
-})
+// Set default theme from config
 
 const displayTheme = computed(() => theme.value || config.value.defaultTheme)
 
@@ -65,8 +61,6 @@ const state = reactive({
     updateTextData,
     handleSmartRewrite,
     handleImageUpload,
-    updateScale,
-    getScale,
     handleReset: () => {
         previewContent.value = null
         selectedPath.value = null
@@ -104,7 +98,6 @@ const state = reactive({
         <PanelGenerator
             v-if="!previewContent"
             :control="state as any"
-            :show-theme-selector="config.showThemeSelector"
             :publication-type="publication.toUpperCase() as 'TRIANGLE' | 'DUSKVOL'"
             @manual-create="handleManualCreate"
         />

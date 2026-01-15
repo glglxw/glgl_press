@@ -1,0 +1,157 @@
+/* Publication-specific themes using CSS variables */
+
+/* Triangle Daily - Light theme with red accents */
+[data-publication="triangle"] {
+    --bg-primary: #e7e5e4;    /* stone-200 */
+    --bg-secondary: #ffffff;
+    --bg-header: #ffffff;
+    --text-primary: #1c1917;   /* stone-900 */
+    --text-secondary: #78716c; /* stone-500 */
+    --accent: #dc2626;         /* red-600 */
+    --accent-hover: #b91c1c;   /* red-700 */
+    --border: #d6d3d1;         /* stone-300 */
+    --shadow: rgba(0, 0, 0, 0.1);
+    --fold-from: #a8a29e;      /* stone-400 */
+    --fold-via: #d6d3d1;       /* stone-300 */
+    --fold-to: #a8a29e;        /* stone-400 */
+    --download-bg: #1c1917;
+    --download-hover: #000000;
+}
+
+/* Duskvol Chronicle - Dark theme with noir aesthetic */
+[data-publication="duskvol"] {
+    --bg-primary: #1c1917;     /* stone-900 */
+    --bg-secondary: #292524;   /* stone-800 */
+    --bg-header: #292524;      /* stone-800 */
+    --text-primary: #e7e5e4;   /* stone-200 */
+    --text-secondary: #a8a29e; /* stone-400 */
+    --accent: #3b82f6;         /* blue-500 */
+    --accent-hover: #1d4ed8;   /* blue-700 */
+    --border: #44403c;         /* stone-700 */
+    --shadow: rgba(0, 0, 0, 0.3);
+    --fold-from: #44403c;      /* stone-700 */
+    --fold-via: #292524;       /* stone-800 */
+    --fold-to: #44403c;        /* stone-700 */
+    --download-bg: #44403c;
+    --download-hover: #57534e;
+}
+
+/* Viewer layout utilities */
+.viewer-page {
+    min-height: 100vh;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+    overflow-y: auto;
+    background-color: var(--bg-primary);
+}
+
+.viewer-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4rem;
+    background-color: var(--bg-header);
+    box-shadow: 0 1px 3px var(--shadow);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    color: var(--text-primary);
+}
+
+.viewer-title {
+    font-weight: 900;
+    font-size: 1.25rem;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+
+.viewer-title:hover {
+    color: var(--accent-hover);
+}
+
+.viewer-meta {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    font-family: serif;
+    border-left: 1px solid var(--border);
+    padding-left: 1rem;
+}
+
+.viewer-btn {
+    padding: 0.5rem 1rem;
+    background-color: var(--download-bg);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.viewer-btn:hover {
+    background-color: var(--download-hover);
+}
+
+.viewer-btn:disabled {
+    opacity: 0.5;
+}
+
+.viewer-btn-accent {
+    background-color: var(--accent);
+}
+
+.viewer-btn-accent:hover {
+    background-color: var(--accent-hover);
+}
+
+.viewer-fold {
+    width: 0.5rem;
+    background: linear-gradient(to right, var(--fold-from), var(--fold-via), var(--fold-to));
+    box-shadow: inset 0 0 4px var(--shadow);
+}
+
+.archive-drawer {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 20rem;
+    background-color: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 0 25px 50px -12px var(--shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.archive-drawer.open {
+    transform: translateX(0);
+}
+
+.archive-item {
+    width: 100%;
+    text-align: left;
+    padding: 1rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    transition: all 0.15s;
+}
+
+.archive-item:hover {
+    border-color: var(--accent);
+    opacity: 0.9;
+}
+
+.archive-item.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+}
