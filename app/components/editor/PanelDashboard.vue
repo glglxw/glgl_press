@@ -29,7 +29,7 @@ const props = defineProps<{
         @click="control.handleReset ? control.handleReset() : (control.previewContent = null)"
         id="btn-reset"
       >
-        <Undo2 class="w-3 h-3" /> Reset / New
+        <Undo2 class="w-3 h-3" /> Back
       </button>
       
       <button

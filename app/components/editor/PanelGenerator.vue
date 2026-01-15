@@ -123,7 +123,12 @@ function handleManualClick() {
              <span class="issue-date">
                <Calendar class="w-3 h-3" /> {{ issue.textData.date }}
              </span>
-             <span class="issue-time">{{ issue.publishedAt ? new Date(issue.publishedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Draft' }}</span>
+             <span 
+               class="issue-status"
+               :class="issue.status === 'draft' ? 'status-draft' : 'status-published'"
+             >
+               {{ issue.status === 'draft' ? '草稿' : '已发布' }}
+             </span>
            </div>
            <h4 class="issue-headline">
              {{ issue.textData.frontPage.headline }}
@@ -221,6 +226,18 @@ function handleManualClick() {
 
 .issue-time {
     @apply text-[10px] bg-stone-100 px-1 rounded text-stone-500;
+}
+
+.issue-status {
+    @apply text-[10px] px-1.5 py-0.5 rounded font-bold;
+}
+
+.status-draft {
+    @apply bg-amber-100 text-amber-700;
+}
+
+.status-published {
+    @apply bg-green-100 text-green-700;
 }
 
 .issue-headline {

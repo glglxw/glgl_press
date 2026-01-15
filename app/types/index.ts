@@ -64,12 +64,18 @@ export interface NewsData {
     secondPage: SecondPageData;
 }
 
+export enum IssueStatus {
+    DRAFT = 'draft',
+    PUBLISHED = 'published'
+}
+
 export interface GeneratedContent {
     id?: string;
     textData: NewsData;
     imageBase64?: string;
     publicationType: PublicationType;
     theme: ThemeType;
+    status?: IssueStatus;
     publishedAt?: string;
 }
 

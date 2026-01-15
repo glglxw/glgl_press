@@ -8,6 +8,7 @@ interface GeneratedContent {
     imageBase64?: string
     publicationType: string
     theme: string
+    status?: 'draft' | 'published'
     publishedAt?: string
 }
 

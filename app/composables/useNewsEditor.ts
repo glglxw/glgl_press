@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { type ThemeType, PublicationType, type GeneratedContent, type NewsData } from '~/types'
+import { type ThemeType, PublicationType, IssueStatus, type GeneratedContent, type NewsData } from '~/types'
 
 export function useNewsEditor(publicationType: PublicationType) {
     const { generateNewsContent, generateNewsImage, rewriteText, loading, loadingStep } = useGemini()
@@ -75,7 +75,9 @@ export function useNewsEditor(publicationType: PublicationType) {
         if (!previewContent.value) return
         isPublishing.value = true
         try {
-            const result = await saveIssue(previewContent.value)
+            // Set status to published
+            const contentToSave = { ...previewContent.value, status: IssueStatus.PUBLISHED }
+            const result = await saveIssue(contentToSave)
             if (result) {
                 previewContent.value = result
                 await loadIssueList()
@@ -91,8 +93,9 @@ export function useNewsEditor(publicationType: PublicationType) {
         if (!previewContent.value) return
         isSaving.value = true
         try {
-            // Prepare draft data 
-            const result = await saveIssue(previewContent.value)
+            // Set status to draft
+            const contentToSave = { ...previewContent.value, status: IssueStatus.DRAFT }
+            const result = await saveIssue(contentToSave)
             if (result) {
                 previewContent.value = result // Update with ID if new
                 await loadIssueList() // Refresh list
