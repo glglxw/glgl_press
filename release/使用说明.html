@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLGL Press 使用说明</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            border-radius: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        section {
+            background: var(--bg-card);
+            border-radius: 0.75rem;
+            padding: 1.5rem 2rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        h2 {
+            color: var(--primary-light);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 1.3rem;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .steps {
+            counter-reset: step;
+        }
+
+        .step {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-left: 0.5rem;
+        }
+
+        .step:last-child {
+            margin-bottom: 0;
+        }
+
+        .step-number {
+            counter-increment: step;
+            width: 2rem;
+            height: 2rem;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-number::before {
+            content: counter(step);
+        }
+
+        .step-content h3 {
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .step-content p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        code {
+            background: var(--bg);
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.9em;
+            color: var(--primary-light);
+        }
+
+        .code-block {
+            background: var(--bg);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            background: none;
+            padding: 0;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--success);
+        }
+
+        .alert-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .faq-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .faq-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .faq-q {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .faq-a {
+            color: var(--text-muted);
+        }
+
+        a {
+            color: var(--primary-light);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 2rem 0;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🔺 GLGL Press</h1>
+            <p class="subtitle">三角时报生成器 使用说明</p>
+        </header>
+
+        <section>
+            <h2>快速开始</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>配置 API Key</h3>
+                        <p>将 <code>.env.example</code> 复制并重命名为 <code>.env</code>，然后用记事本打开，填入您的 Gemini API Key</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>获取 API Key</h3>
+                        <p>访问 <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI
+                                Studio</a>，登录后点击「Create API Key」获取免费密钥</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>启动应用</h3>
+                        <p>双击 <code>启动.bat</code>，浏览器将自动打开应用</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <span class="alert-icon">✅</span>
+                <div>完成以上步骤后，您就可以开始使用三角时报生成器了！</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>配置文件示例</h2>
+            <p>打开 <code>.env</code> 文件，内容应该类似这样：</p>
+            <div class="code-block">
+                <code># Gemini API Key (必填)<br>API_KEY=AIzaSyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx<br><br># API 代理地址 (可选，中国用户配置)<br>API_BASE_URL=https://your-proxy.yourdomain.com</code>
+            </div>
+            <div class="alert alert-warning">
+                <span class="alert-icon">⚠️</span>
+                <div>请妥善保管您的 API Key，不要分享给他人</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>🇨🇳 中国用户说明</h2>
+            <p>由于网络限制，中国大陆用户无法直接访问 Google Gemini API。您需要配置 API 代理：</p>
+
+            <div class="steps" style="margin-top: 1rem;">
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>获取代理地址</h3>
+                        <p>使用 Cloudflare Worker 搭建代理，并<strong>绑定自定义域名</strong>（workers.dev 域名在国内被封锁）</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number"></div>
+                    <div class="step-content">
+                        <h3>配置代理</h3>
+                        <p>在 <code>.env</code> 文件中添加：<br><code>API_BASE_URL=https://your-proxy.yourdomain.com</code></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-warning">
+                <span class="alert-icon">💡</span>
+                <div>如果您没有代理服务，可以联系开发者获取公共代理地址</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>常见问题</h2>
+
+            <div class="faq-item">
+                <p class="faq-q">Q: 双击启动后提示"端口 3000 已被占用"？</p>
+                <p class="faq-a">A: 可能应用已在运行。请先双击 <code>停止.bat</code> 关闭之前的进程，然后重新启动。</p>
+            </div>
+
+            <div class="faq-item">
+                <p class="faq-q">Q: 浏览器没有自动打开？</p>
+                <p class="faq-a">A: 请手动打开浏览器，访问 <a href="http://localhost:3000">http://localhost:3000</a></p>
+            </div>
+
+            <div class="faq-item">
+                <p class="faq-q">Q: 如何获取 Gemini API Key？</p>
+                <p class="faq-a">A: 访问 <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI
+                        Studio</a>，使用 Google 账号登录，点击「Create API Key」即可免费创建。</p>
+            </div>
+
+            <div class="faq-item">
+                <p class="faq-q">Q: 提示 API Key 无效？</p>
+                <p class="faq-a">A: 请确认 <code>.env</code> 文件中的 API_KEY 值正确无误，注意不要有多余的空格。</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>关闭应用</h2>
+            <p>有两种方式关闭应用：</p>
+            <ul style="margin-top: 0.5rem; padding-left: 1.5rem; color: var(--text-muted);">
+                <li>在启动窗口按任意键</li>
+                <li>或者双击运行 <code>停止.bat</code></li>
+            </ul>
+        </section>
+
+        <footer>
+            <p>GLGL Press - 三角时报生成器</p>
+        </footer>
+    </div>
+</body>
+
+</html>
