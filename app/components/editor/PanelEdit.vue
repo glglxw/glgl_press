@@ -21,7 +21,7 @@ interface EditorControl {
 
 const props = defineProps<{
   control: EditorControl
-  publicationType?: 'TRIANGLE' | 'DUSKVOL'
+  publicationType?: 'TRIANGLE' | 'DUSKVOL' | 'ADVENTURER'
 }>()
 
 const isDuskvol = computed(() => props.publicationType === 'DUSKVOL')

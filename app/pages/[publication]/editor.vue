@@ -98,7 +98,7 @@ const state = reactive({
         <PanelGenerator
             v-if="!previewContent"
             :control="state as any"
-            :publication-type="publication.toUpperCase() as 'TRIANGLE' | 'DUSKVOL'"
+            :publication-type="publication.toUpperCase() as 'TRIANGLE' | 'DUSKVOL' | 'ADVENTURER'"
             @manual-create="handleManualCreate"
         />
 
@@ -112,7 +112,7 @@ const state = reactive({
         <PanelEdit
             v-else
             :control="state as any"
-            :publication-type="publication.toUpperCase() as 'TRIANGLE' | 'DUSKVOL'"
+            :publication-type="publication.toUpperCase() as 'TRIANGLE' | 'DUSKVOL' | 'ADVENTURER'"
         />
       </div>
     </div>

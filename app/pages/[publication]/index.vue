@@ -115,7 +115,9 @@ async function handleDownload(type: 'page1' | 'page2' | 'all') {
 
     const link = document.createElement('a')
     const suffix = type === 'all' ? 'Full' : type === 'page1' ? 'Page1' : 'Page2'
-    const pubName = publication.value === 'triangle' ? '三角日报' : 'Duskvol'
+    let pubName = 'Triangle'
+    if (publication.value === 'duskvol') pubName = 'Duskvol'
+    if (publication.value === 'adventurer') pubName = 'Adventurer'
     link.download = `${pubName}-${data.value.textData.date}-${suffix}.png`
     link.href = dataUrl
     link.click()
@@ -178,7 +180,7 @@ const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
           <span class="font-black text-xl tracking-tighter uppercase flex items-center gap-2"
                     :class="config.isDark ? 'text-stone-100' : 'text-red-600'">
             <component :is="IconComponent" v-if="config.isDark" class="w-5 h-5" />
-            {{ config.isDark ? 'The Duskvol Chronicle' : 'Triangle Daily' }}
+            {{ config.title }}
           </span>
           <div class="text-xs opacity-60 font-serif border-l pl-4 hidden sm:block"
                :class="config.isDark ? 'border-stone-600' : 'border-current'">
