@@ -62,7 +62,7 @@ async function handleDownload(type: 'page1' | 'page2' | 'all') {
     container.style.opacity = '0.01'
     container.style.pointerEvents = 'none'
     container.style.width = type === 'all' ? '1600px' : '800px'
-    container.style.backgroundColor = config.value.isDark ? '#1c1917' : '#ffffff'
+    container.style.backgroundColor = config.value.bgHex
     document.body.appendChild(container)
 
     const appendClone = (ref: HTMLDivElement | null) => {
@@ -112,7 +112,7 @@ async function handleDownload(type: 'page1' | 'page2' | 'all') {
     const dataUrl = await toPng(container, {
       quality: 1.0,
       pixelRatio: 2,
-      backgroundColor: config.value.isDark ? '#1c1917' : '#ffffff'
+      backgroundColor: config.value.bgHex
     })
 
     const link = document.createElement('a')
@@ -132,8 +132,6 @@ async function handleDownload(type: 'page1' | 'page2' | 'all') {
     isDownloading.value = false
   }
 }
-
-const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
 </script>
 
 <template>
@@ -142,21 +140,21 @@ const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
     <div v-if="loading" class="h-screen w-full flex items-center justify-center flex-col gap-4"
          :class="config.styles.loadingState">
       <Loader2 class="w-8 h-8 animate-spin" />
-      <p class="font-serif tracking-widest uppercase text-xs">{{ config.isDark ? t('publication.common.loadingVoid') : t('publication.common.loading') }}</p>
+      <p class="font-serif tracking-widest uppercase text-xs">{{ t(config.styles.loadingTextKey) }}</p>
     </div>
 
     <!-- No Data State -->
     <div v-else-if="!data" class="h-screen w-full flex items-center justify-center flex-col gap-4"
          :class="config.styles.loadingState">
-      <component :is="IconComponent" class="w-16 h-16 opacity-20" />
-      <h1 class="text-xl font-bold" :class="config.isDark ? 'text-stone-200' : ''">
-        {{ config.isDark ? t('publication.common.noDataVoid') : t('publication.common.noData') }}
+      <component :is="config.icon" class="w-16 h-16 opacity-20" />
+      <h1 class="text-xl font-bold" :class="config.styles.headerText">
+        {{ t(config.styles.noDataHeaderKey) }}
       </h1>
       <p class="font-serif text-sm">{{ config.emptyStateText }}</p>
       <NuxtLink :to="`/${publication}/editor`" 
                 class="mt-4 px-6 py-2 text-white font-bold rounded"
                 :class="config.styles.primaryButton">
-        {{ config.isDark ? t('publication.common.enterEditorVoid') : t('publication.common.enterEditor') }}
+        {{ t(config.styles.enterEditorKey) }}
       </NuxtLink>
     </div>
 
@@ -185,8 +183,7 @@ const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
             <component :is="config.icon" class="w-5 h-5" />
             {{ config.title }}
           </span>
-          <div class="text-xs opacity-60 font-serif border-l pl-4 hidden sm:block"
-               :class="config.isDark ? 'border-stone-600' : 'border-current'">
+          <div class="text-xs opacity-60 font-serif border-l pl-4 hidden sm:block border-current">
             {{ data.textData.date }} • {{ data.textData.location }}
           </div>
         </div>
@@ -194,17 +191,17 @@ const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
           <button @click="handleDownload('page1')" :disabled="isDownloading"
                   class="px-4 py-2 text-white text-xs font-bold uppercase flex items-center gap-2 disabled:opacity-50"
                   :class="config.styles.secondaryButton">
-            <Download class="w-3 h-3" /> {{ config.isDark ? t('publication.common.page1') : t('publication.common.page1') }}
+            <Download class="w-3 h-3" /> {{ t('publication.common.page1') }}
           </button>
           <button @click="handleDownload('page2')" :disabled="isDownloading"
                   class="px-4 py-2 text-white text-xs font-bold uppercase flex items-center gap-2 disabled:opacity-50"
                   :class="config.styles.secondaryButton">
-            <Download class="w-3 h-3" /> {{ config.isDark ? t('publication.common.page2') : t('publication.common.page2') }}
+            <Download class="w-3 h-3" /> {{ t('publication.common.page2') }}
           </button>
           <button @click="handleDownload('all')" :disabled="isDownloading"
                   class="px-4 py-2 text-white text-xs font-bold uppercase flex items-center gap-2 disabled:opacity-50"
                   :class="config.styles.primaryButton">
-            <Download class="w-3 h-3" /> {{ config.isDark ? t('publication.common.fullIssue') : t('publication.common.fullIssue') }}
+            <Download class="w-3 h-3" /> {{ t('publication.common.fullIssue') }}
           </button>
         </div>
       </div>
@@ -243,7 +240,7 @@ const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
       <NuxtLink :to="`/${publication}/editor`"
                 class="fixed bottom-4 right-4 z-50 px-3 py-1 text-white text-[10px] uppercase font-bold tracking-widest opacity-20 hover:opacity-100 transition-opacity rounded shadow-lg"
                 :class="config.styles.editorLink">
-        {{ config.isDark ? t('publication.common.pressRoomVoid') : t('publication.common.pressRoom') }}
+        {{ t(config.styles.pressRoomKey) }}
       </NuxtLink>
 
       <!-- Archives Drawer Backdrop -->
@@ -280,7 +277,7 @@ const IconComponent = computed(() => config.value.isDark ? Ghost : Lock)
                   ]">
             <div class="flex justify-between items-start mb-2">
               <span class="text-xs font-bold flex items-center gap-1 opacity-60">
-                <Calendar v-if="!config.isDark" class="w-3 h-3" />
+                <Calendar v-if="config.styles.themeKey !== 'dark'" class="w-3 h-3" />
                 {{ issue.textData.date }}
               </span>
               <ChevronRight class="w-3 h-3 opacity-40 group-hover:opacity-100 transition-opacity" />

@@ -165,7 +165,7 @@ const state = reactive({
       <div v-if="!previewContent" class="flex-1 flex flex-col items-center justify-center gap-4"
            :class="config.styles.previewText">
         <component :is="config.icon" class="w-16 h-16 opacity-20" />
-        <p class="font-serif" :class="config.isDark ? 'italic' : ''">{{ t(`publication.${publication}.editor.emptyState`) }}</p>
+        <p class="font-serif" :class="config.styles.previewText">{{ t(`publication.${publication}.editor.emptyState`) }}</p>
       </div>
       <template v-else>
         <!-- Side-by-side newspaper layout with center fold -->

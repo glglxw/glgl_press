@@ -15,7 +15,6 @@ describe('EDITOR_CONFIGS', () => {
         const config = EDITOR_CONFIGS.TRIANGLE
         expect(config.publicationType).toBe(PublicationType.TRIANGLE)
         expect(config.defaultTheme).toBe(ThemeType.CLASSIC_RED)
-        expect(config.isDark).toBe(false)
         expect(config.title).toBe('三角日报编辑器')
         expect(config.styles.themeKey).toBe('light')
     })
@@ -24,7 +23,6 @@ describe('EDITOR_CONFIGS', () => {
         const config = EDITOR_CONFIGS.DUSKVOL
         expect(config.publicationType).toBe(PublicationType.DUSKVOL)
         expect(config.defaultTheme).toBe(ThemeType.NOIR)
-        expect(config.isDark).toBe(true)
         expect(config.title).toBe('The Press Room')
         expect(config.styles.themeKey).toBe('dark')
     })
@@ -33,7 +31,6 @@ describe('EDITOR_CONFIGS', () => {
         const config = EDITOR_CONFIGS.ADVENTURER
         expect(config.publicationType).toBe(PublicationType.ADVENTURER)
         expect(config.defaultTheme).toBe(ThemeType.PARCHMENT)
-        expect(config.isDark).toBe(false)
         expect(config.title).toBe('冒险者工会日报')
         expect(config.styles.themeKey).toBe('parchment')
     })

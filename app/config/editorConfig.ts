@@ -29,6 +29,11 @@ export interface PublicationStyles {
     previewArea: string
     previewText: string
     themeKey: 'light' | 'dark' | 'parchment'
+    // Text Keys
+    loadingTextKey: string
+    noDataHeaderKey: string
+    enterEditorKey: string
+    pressRoomKey: string
 }
 
 export interface EditorConfig {
@@ -38,7 +43,7 @@ export interface EditorConfig {
     title: string
     subtitle: string
     emptyStateText: string
-    isDark: boolean
+    bgHex: string
     blankTemplate: NewsData
     styles: PublicationStyles
 }
@@ -135,7 +140,7 @@ export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
         title: '三角日报编辑器',
         subtitle: 'Triangle CMS v4.0 • Nuxt Edition',
         emptyStateText: '在此处预览生成的新闻日报',
-        isDark: false,
+        bgHex: '#ffffff',
         blankTemplate: TRIANGLE_BLANK_TEMPLATE,
         styles: {
             pageBg: 'bg-stone-200',
@@ -162,7 +167,11 @@ export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
             sidebarSubtitle: 'text-stone-500',
             previewArea: 'bg-stone-200',
             previewText: 'text-stone-400',
-            themeKey: 'light'
+            themeKey: 'light',
+            loadingTextKey: 'publication.common.loading',
+            noDataHeaderKey: 'publication.common.noData',
+            enterEditorKey: 'publication.common.enterEditor',
+            pressRoomKey: 'publication.common.pressRoom'
         }
     },
     DUSKVOL: {
@@ -172,7 +181,7 @@ export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
         title: 'The Press Room',
         subtitle: 'Duskvol Chronicle • Printing Press',
         emptyStateText: 'The printing press awaits...',
-        isDark: true,
+        bgHex: '#1c1917',
         blankTemplate: DUSKVOL_BLANK_TEMPLATE,
         styles: {
             pageBg: 'bg-stone-900',
@@ -198,8 +207,12 @@ export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
             sidebarTitle: 'text-stone-100',
             sidebarSubtitle: 'text-stone-400 italic',
             previewArea: 'bg-stone-950',
-            previewText: 'text-stone-600',
-            themeKey: 'dark'
+            previewText: 'text-stone-600 italic',
+            themeKey: 'dark',
+            loadingTextKey: 'publication.common.loadingVoid',
+            noDataHeaderKey: 'publication.common.noDataVoid',
+            enterEditorKey: 'publication.common.enterEditorVoid',
+            pressRoomKey: 'publication.common.pressRoomVoid'
         }
     },
     ADVENTURER: {
@@ -209,7 +222,7 @@ export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
         title: '冒险者工会日报',
         subtitle: 'Adventurer Guild • Daily Report',
         emptyStateText: '羊皮纸准备就绪...',
-        isDark: false,
+        bgHex: '#f0e6d2',
         blankTemplate: ADVENTURER_BLANK_TEMPLATE,
         styles: {
             pageBg: 'bg-[#f0e6d2]',
@@ -235,8 +248,12 @@ export const EDITOR_CONFIGS: Record<string, EditorConfig> = {
             sidebarTitle: 'text-[#4a3728]',
             sidebarSubtitle: 'text-[#8b5a2b] italic',
             previewArea: 'bg-[#d9cdb8]',
-            previewText: 'text-[#8b5a2b]',
-            themeKey: 'parchment'
+            previewText: 'text-[#8b5a2b] italic',
+            themeKey: 'parchment',
+            loadingTextKey: 'publication.common.loading',
+            noDataHeaderKey: 'publication.common.noData',
+            enterEditorKey: 'publication.common.enterEditor',
+            pressRoomKey: 'publication.common.pressRoom'
         }
     }
 }
