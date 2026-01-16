@@ -94,6 +94,8 @@ assemble_package() {
     # 复制 release 文件
     cp "$RELEASE_DIR/启动.bat" "$BUILD_DIR/"
     cp "$RELEASE_DIR/停止.bat" "$BUILD_DIR/"
+    cp "$RELEASE_DIR/start.js" "$BUILD_DIR/"
+    cp "$RELEASE_DIR/stop.js" "$BUILD_DIR/"
     cp "$RELEASE_DIR/.env.example" "$BUILD_DIR/"
     cp "$RELEASE_DIR/使用说明.html" "$BUILD_DIR/"
     
