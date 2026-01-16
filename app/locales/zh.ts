@@ -41,7 +41,16 @@ export default {
         // Editor page
         previewHint: '在此处预览生成的报纸',
         previewHintDuskvol: '印刷机就绪...',
-        mdHint: 'MD: **粗体** *斜体* # 标题'
+        mdHint: 'MD: **粗体** *斜体* # 标题',
+
+        // Style Adjuster
+        styleTitle: '样式',
+        reset: '重置',
+        fontSize: '字号',
+        lineHeight: '行高',
+        offsetX: '水平偏移 (X)',
+        offsetY: '垂直偏移 (Y)',
+        selectSectionToAdjust: '请选择一个区块以调整样式'
     },
     publication: {
         common: {

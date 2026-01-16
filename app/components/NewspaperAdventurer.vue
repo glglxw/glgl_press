@@ -1,15 +1,66 @@
 <script setup lang="ts">
 import { Scroll, Sword, Shield, Map, Skull } from 'lucide-vue-next'
 import type { NewsData, ThemeType, ThemeColors } from '~/types'
+import { useAutoFitText } from '~/composables/useAutoFitText'
+import type { SectionStyles } from '~/composables/useSectionStyles'
+
+const { autoFitAll } = useAutoFitText()
+const containerRef = ref<HTMLElement | null>(null)
+
+onMounted(() => {
+  // Disabled auto-fit to allow manual style control
+  // if (containerRef.value) {
+  //   autoFitAll(containerRef.value)
+  // }
+})
+
+onUpdated(() => {
+  // Disabled auto-fit to allow manual style control
+  // if (containerRef.value) {
+  //   // Skip auto-fit for sections with manual styles
+  //   const elementsWithAutofit = containerRef.value.querySelectorAll('[data-autofit]')
+  //   elementsWithAutofit.forEach((el) => {
+  //     const element = el as HTMLElement
+  //     const container = element.closest('[data-autofit-container]') as HTMLElement
+  //     
+  //     // Get the section ID from the container
+  //     const sectionId = container?.id
+  //     const hasManualStyles = sectionId && props.sectionStyles?.[getSectionIdFromDomId(sectionId)]
+  //     
+  //     // Skip if manual font-size or line-height is set
+  //     if (hasManualStyles && (hasManualStyles.fontSize || hasManualStyles.lineHeight)) {
+  //       return
+  //     }
+  //     
+  //     // Run auto-fit for this element
+  //     if (container) {
+  //       const minSize = parseInt(element.dataset.autofitMin || '8')
+  //       const maxSize = parseInt(element.dataset.autofitMax || '14')
+  //       const { fitTextToContainer } = useAutoFitText()
+  //       fitTextToContainer(element, container, minSize, maxSize)
+  //     }
+  //   })
+  // }
+})
+
+// Helper to map DOM ID to section path
+function getSectionIdFromDomId(domId: string): string {
+  const mapping: Record<string, string> = {
+    'adv-main-story': 'frontPage.mainStory',
+    'adv-rumors': 'frontPage.newsSnippets',
+    // Add more mappings as needed
+  }
+  return mapping[domId] || domId
+}
 
 interface Props {
   data: NewsData
-  theme: ThemeType
-  volumeNumber: number
+  theme?: ThemeType
   imageSrc?: string
-  page: 1 | 2
-  selectedSectionId?: string | null
+  page?: number
   onSectionSelect?: (path: string, label: string) => void
+  selectedSectionId?: string | null
+  sectionStyles?: Record<string, SectionStyles>
 }
 
 const props = defineProps<Props>()
@@ -26,6 +77,13 @@ function handleClear() {
 function isSelected(path: string) {
   return props.selectedSectionId === path
 }
+
+
+
+const volumeNumber = computed(() => {
+  const match = props.data?.location?.match(/Vol\. (\d+)/)
+  return match ? match[1] : '1'
+})
 
 const THEMES: Record<ThemeType, ThemeColors> = {
   CLASSIC_RED: {
@@ -47,7 +105,7 @@ const THEMES: Record<ThemeType, ThemeColors> = {
 
 // Adventurer colors
 const adventurerColors = computed(() => ({
-  accent: THEMES[props.theme].accent,
+  accent: THEMES[props.theme || 'PARCHMENT'].accent,
   text: '#4a3728',
   bg: '#f5f5dc',
   border: '#d2b48c',
@@ -60,6 +118,7 @@ const adventurerColors = computed(() => ({
     class="w-[794px] h-[1123px] flex-shrink-0 relative overflow-hidden shadow-xl origin-top font-serif flex flex-col text-[#2c1810]"
     :style="{ backgroundColor: '#e6dcc3' }"
     @click="handleClear"
+    ref="containerRef"
   >
     <!-- SVG Filters for Ink Bleed & Rough Edges -->
     <svg width="0" height="0" class="absolute">
@@ -97,7 +156,7 @@ const adventurerColors = computed(() => ({
     <div class="relative z-10 w-full h-full flex flex-col p-16 pb-12">
         
         <!-- Header: Guild Seal & Title -->
-        <header class="flex items-end justify-between mb-8 relative">
+        <header id="adv-header" class="flex items-end justify-between mb-8 relative">
             <div class="absolute bottom-0 left-0 right-0 h-1 bg-[#4a3728] opacity-80" style="clip-path: polygon(0 40%, 100% 0, 98% 100%, 2% 80%); filter: url(#ink-bleed);"></div>
             
             <div class="flex items-center gap-6">
@@ -106,23 +165,23 @@ const adventurerColors = computed(() => ({
                     <Scroll class="w-16 h-16 text-[#654321] drop-shadow-md relative z-10" :stroke-width="1.5" style="filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.3));" />
                 </div>
                 <div>
-                    <h1 class="text-5xl font-black uppercase tracking-widest leading-none text-[#2c1810]" style="filter: url(#ink-bleed); text-shadow: 2px 2px 0px rgba(139,69,19,0.3);">
+                    <h1>
                         冒险者公会日报
                     </h1>
-                    <div class="text-sm font-bold tracking-[0.5em] uppercase text-[#8b5a2b] mt-1 pl-1">Adventurer's Guild Daily</div>
+                    <div class="subtitle">Adventurer's Guild Daily</div>
                 </div>
             </div>
             
             <div class="text-right mb-2">
                 <div 
-                    class="text-2xl font-bold cursor-pointer text-[#4a3728]"
+                    id="adv-date"
+                    class="cursor-pointer"
                     :class="{ 'ring-2 ring-orange-900/50 rounded': isSelected('date') }"
                     @click="(e) => handleSelect('date', 'Date', e)"
-                    style="transform: rotate(-2deg);"
                 >
                     {{ data.date }}
                 </div>
-                <div class="text-xs font-bold tracking-widest text-[#8b5a2b] opacity-80 mt-1">
+                <div class="meta">
                     {{ data.location }} • Vol. {{ volumeNumber }}
                 </div>
             </div>
@@ -130,47 +189,58 @@ const adventurerColors = computed(() => ({
 
         <!-- Page 1 -->
         <template v-if="page === 1">
-            <div class="flex-1 grid grid-cols-12 gap-10">
+            <div class="flex-1 grid grid-cols-12 gap-8">
                 <!-- Left Parchment Column -->
                 <div class="col-span-4 flex flex-col gap-8 relative">
                     <!-- Vertical Ink Divider -->
                     <div class="absolute -right-5 top-0 bottom-0 w-[2px] bg-[#4a3728] opacity-30" style="clip-path: polygon(0 0, 100% 2%, 80% 98%, 10% 100%); filter: url(#ink-bleed);"></div>
 
                     <!-- Bounties (Pinned Note style) -->
-                    <div 
-                        class="bg-[#dfd3bc] p-4 shadow-lg transform -rotate-1 cursor-pointer relative"
+                    <StyledSection 
+                        id="adv-bounties"
+                        section-id="frontPage.column1"
+                        :section-styles="sectionStyles"
+                        tag="div"
+                        class="cursor-pointer relative"
                         :class="{ 'ring-2 ring-orange-900/50': isSelected('frontPage.column1') }"
-                        @click="(e) => handleSelect('frontPage.column1', 'Bounties', e)"
-                        style="box-shadow: 2px 4px 8px rgba(0,0,0,0.2);"
+                        @click="(e: Event) => handleSelect('frontPage.column1', 'Bounties', e)"
                     >
                         <!-- Pin -->
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-[#8b4513] shadow-inner border border-[#4a3728/50] z-20"></div>
+                        <div class="pin"></div>
                         
-                        <div class="border-b-2 border-[#8b5a2b] pb-2 mb-2 flex items-center justify-center gap-2 opacity-80 border-dashed">
+                        <div class="header">
                              <Sword class="w-4 h-4" />
-                             <h3 class="font-bold text-lg uppercase">WANTED</h3>
+                             <h3>WANTED</h3>
                              <Sword class="w-4 h-4 transform scale-x-[-1]" />
                         </div>
-                        <div class="text-sm leading-relaxed font-semibold text-[#4a3728] whitespace-pre-wrap font-serif">{{ data.frontPage.column1.content }}</div>
-                    </div>
+                        <div class="content">{{ data.frontPage.column1.content }}</div>
+                    </StyledSection>
 
                     <!-- Rumors -->
-                    <div class="flex-1 mt-4">
-                         <h3 class="font-bold text-xl uppercase mb-4 text-[#654321] flex items-center gap-2 border-b border-[#654321] pb-1 w-max" style="transform: rotate(1deg);">
-                            <Map class="w-5 h-5" /> Tavern Rumors
+                    <div id="adv-rumors" class="flex-1 mt-2 overflow-hidden">
+                         <h3 class="header">
+                            <Map class="w-4 h-4" /> Tavern Rumors
                         </h3>
-                        <div class="space-y-6">
-                            <div 
+                        <div class="content">
+                            <StyledSection 
                                 v-for="(snippet, idx) in data.frontPage.newsSnippets"
                                 :key="idx"
-                                class="cursor-pointer group relative pl-4"
-                                :class="{ 'ring-2 ring-orange-900/50 rounded': isSelected(`frontPage.newsSnippets.${idx}`) }"
-                                @click="(e) => handleSelect(`frontPage.newsSnippets.${idx}`, `Rumor ${idx+1}`, e)"
+                                class="item group"
+                                section-id="frontPage.rumors"
+                                :section-styles="sectionStyles"
+                                tag="div"
+                                :class="{ 'ring-2 ring-orange-900/50 rounded': isSelected('frontPage.rumors') }"
+                                @click="(e: Event) => handleSelect('frontPage.rumors', 'Tavern Rumors', e)"
+                                data-autofit-container
                             >
-                                <div class="absolute left-0 top-2 w-2 h-2 bg-[#8b4513] rounded-full opacity-60"></div>
-                                <h5 class="font-bold text-base text-[#4a3728] mb-1 group-hover:text-[#8b4513] transition-colors">{{ snippet.title }}</h5>
-                                <p class="text-sm leading-tight text-[#5d4037] italic">"{{ snippet.content }}"</p>
-                            </div>
+                                <div class="dot"></div>
+                                <h5>{{ snippet.title }}</h5>
+                                <p 
+                                    data-autofit
+                                    data-autofit-min="8"
+                                    data-autofit-max="12"
+                                >"{{ snippet.content }}"</p>
+                            </StyledSection>
                         </div>
                     </div>
                 </div>
@@ -179,68 +249,103 @@ const adventurerColors = computed(() => ({
                 <div class="col-span-8 flex flex-col h-full relative">
                     <!-- Headline -->
                     <div 
-                        class="text-center cursor-pointer mb-6"
+                        id="adv-headline"
+                        class="cursor-pointer mb-4"
                         :class="{ 'ring-2 ring-orange-900/50 rounded': isSelected('frontPage.headline') }"
                         @click="(e) => handleSelect('frontPage.headline', 'Headline', e)"
                     >
-                        <h2 class="text-5xl font-black leading-tight text-[#2c1810]" style="filter: url(#ink-bleed);">{{ data.frontPage.headline }}</h2>
+                        <h2 style="filter: url(#ink-bleed);">{{ data.frontPage.headline }}</h2>
                     </div>
 
                     <!-- Main Image (Painting Style) -->
-                    <div 
-                        class="w-full h-72 p-2 bg-white shadow-md cursor-pointer transform rotate-1 hover:rotate-0 transition-transform mb-6 relative"
-                        :class="{ 'ring-2 ring-orange-900/50': isSelected('image') }"
-                        @click="(e) => handleSelect('image', 'Main Image', e)"
+                    <StyledSection
+                        section-id="image"
+                        :section-styles="sectionStyles"
+                        :enable-typography="false"
+                        tag="div"
+                        class="w-full mb-6 relative z-10"
                     >
-                        <!-- Rough Sketch Borders -->
-                        <div class="absolute inset-0 border-2 border-[#4a3728] opacity-80" style="clip-path: polygon(0 0, 100% 1%, 99% 100%, 1% 99%); filter: url(#ink-bleed);"></div>
-                        
-                        <div class="w-full h-full overflow-hidden relative grayscale-[0.2] sepia-[0.4] contrast-[1.1]">
-                             <img v-if="imageSrc" :src="imageSrc" class="w-full h-full object-cover" alt="News" />
-                             <div v-else class="w-full h-full flex items-center justify-center bg-[#f0e6d2] text-[#8b5a2b] font-serif italic text-lg opacity-60">
-                                <span class="animate-pulse">Divining Image...</span>
-                             </div>
+                        <div 
+                            id="adv-main-image"
+                            class="w-full h-72 p-2 bg-white shadow-md cursor-pointer transform rotate-1 hover:rotate-0 transition-transform relative"
+                            :class="{ 'ring-2 ring-orange-900/50': isSelected('image') }"
+                            @click="(e: Event) => handleSelect('image', 'Main Image', e)"
+                        >
+                            <!-- Rough Sketch Borders -->
+                            <div class="border-sketch" style="clip-path: polygon(0 0, 100% 1%, 99% 100%, 1% 99%); filter: url(#ink-bleed);"></div>
+                            
+                            <div class="image-container">
+                                 <img v-if="imageSrc" :src="imageSrc" alt="News" />
+                                 <div v-else class="placeholder">
+                                    <span class="animate-pulse">Divining Image...</span>
+                                 </div>
+                            </div>
                         </div>
-                    </div>
+                    </StyledSection>
 
                     <!-- Main Story -->
-                    <div class="columns-2 gap-8 text-base leading-7 text-justify text-[#2c1810] mb-4">
-                        <div 
-                            class="cursor-pointer first-letter:text-5xl first-letter:font-black first-letter:float-left first-letter:mr-2 first-letter:text-[#654321]"
+                    <div 
+                        id="adv-main-story"
+                        data-autofit-container
+                    >
+                        <StyledSection
+                            section-id="frontPage.mainStory"
+                            :section-styles="sectionStyles"
+                            tag="div"
+                            content-class="content"
                             :class="{ 'ring-2 ring-orange-900/50 rounded': isSelected('frontPage.mainStory') }"
-                            @click="(e) => handleSelect('frontPage.mainStory', 'Main Story', e)"
+                            @click="(e: Event) => handleSelect('frontPage.mainStory', 'Main Story', e)"
+                            data-autofit
+                            data-autofit-min="9"
+                            data-autofit-max="18"
                         >
                             {{ data.frontPage.mainStory }}
-                        </div>
+                        </StyledSection>
                     </div>
 
                     <!-- Footer With Spacer & Announcements -->
-                    <div class="mt-auto relative pt-8">
+                    <div id="adv-footer" class="mt-auto relative pt-3">
                          <!-- Small Footer Spacer -->
-                        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-[#8b4513] opacity-30 rounded-full"></div>
+                        <div class="spacer"></div>
                         
-                        <div class="flex gap-6">
-                            <div 
-                                class="flex-1 cursor-pointer"
-                                :class="{ 'ring-2 ring-orange-900/50 rounded': isSelected('frontPage.column2') }"
-                                @click="(e) => handleSelect('frontPage.column2', 'Announcements', e)"
+                        <StyledSection 
+                            section-id="frontPage.footerInfo"
+                            :section-styles="sectionStyles"
+                            :enable-typography="false"
+                            tag="div"
+                            class="group-container"
+                            content-class="flex gap-4"
+                            :class="{ 'ring-2 ring-orange-900/30 rounded p-1': isSelected('frontPage.footerInfo') }"
+                            @click="(e: Event) => handleSelect('frontPage.footerInfo', 'Footer Sections', e)"
+                        >
+                            <StyledSection 
+                                id="adv-decrees"
+                                section-id="frontPage.footerInfo"
+                                :section-styles="sectionStyles"
+                                :enable-offset="false"
+                                tag="div"
+                                class="cursor-pointer flex-1"
+                                :class="{ 'ring-2 ring-orange-900/50 rounded': isSelected('frontPage.footerInfo') }"
                             >
-                                <h4 class="font-bold text-sm uppercase mb-2 text-[#8b5a2b] tracking-wider">Guild Decrees</h4>
-                                <p class="text-xs leading-relaxed opacity-90 font-medium">{{ data.frontPage.column2.content }}</p>
-                            </div>
+                                <h4>Guild Decrees</h4>
+                                <p>{{ data.frontPage.column2.content }}</p>
+                            </StyledSection>
                             
-                            <div 
-                                class="flex-1 cursor-pointer bg-[#2c1810] text-[#e6dcc3] p-3 shadow-inner transform -rotate-1"
-                                :class="{ 'ring-2 ring-orange-500 rounded': isSelected('frontPage.weirdNews') }"
-                                @click="(e) => handleSelect('frontPage.weirdNews', 'Monster Guide', e)"
-                                style="clip-path: polygon(2% 2%, 98% 0, 100% 98%, 0 100%);"
+                            <StyledSection 
+                                id="adv-monster-guide"
+                                section-id="frontPage.footerInfo"
+                                :section-styles="sectionStyles"
+                                :enable-offset="false"
+                                tag="div"
+                                class="cursor-pointer flex-1"
+                                :class="{ 'ring-2 ring-orange-500 rounded': isSelected('frontPage.footerInfo') }"
                             >
-                                <h4 class="font-bold text-sm uppercase mb-1 flex items-center gap-2 text-[#d2b48c] border-b border-[#d2b48c]/30 pb-1">
-                                    <Skull class="w-4 h-4" /> {{ data.frontPage.weirdNews.title }}
+                                <h4>
+                                    <Skull class="w-3 h-3" /> {{ data.frontPage.weirdNews.title }}
                                 </h4>
-                                <p class="text-xs leading-tight italic opacity-90">{{ data.frontPage.weirdNews.content }}</p>
-                            </div>
-                        </div>
+                                <p>{{ data.frontPage.weirdNews.content }}</p>
+                            </StyledSection>
+                        </StyledSection>
                     </div>
                 </div>
             </div>
@@ -248,86 +353,101 @@ const adventurerColors = computed(() => ({
 
         <!-- Page 2 -->
         <template v-else-if="page === 2">
-            <div class="flex-1 grid grid-cols-12 gap-10">
+            <div class="flex-1 grid grid-cols-12 gap-6 overflow-hidden">
                 <!-- Left Column -->
                 <div class="col-span-4 flex flex-col gap-8 relative">
                      <!-- Vertical Ink Divider -->
                     <div class="absolute -right-5 top-0 bottom-0 w-[2px] bg-[#4a3728] opacity-30" style="clip-path: polygon(0 0, 100% 2%, 80% 98%, 10% 100%); filter: url(#ink-bleed);"></div>
 
                     <!-- Recruitment Board -->
-                    <div>
-                         <div class="text-center mb-6 relative">
-                             <div class="absolute inset-x-0 bottom-1 h-[1px] bg-[#4a3728] opacity-40"></div>
-                            <h3 class="text-2xl font-black uppercase tracking-widest text-[#654321]" style="filter: url(#ink-bleed);">Party Board</h3>
+                    <div id="adv-party-board">
+                         <div class="header">
+                             <div class="line"></div>
+                             <h3>Party Board</h3>
                          </div>
                          
                          <div class="space-y-4">
                             <div 
                                 v-for="(ad, idx) in data.secondPage.classifieds"
                                 :key="idx"
-                                class="p-3 bg-white/40 border border-[#8b5a2b]/30 shadow-sm cursor-pointer hover:bg-white/60 transition-colors"
+                                class="ad-item"
                                 :class="{ 'ring-2 ring-orange-900/50': isSelected(`secondPage.classifieds.${idx}`) }"
                                 @click="(e) => handleSelect(`secondPage.classifieds.${idx}`, `Recruitment ${idx+1}`, e)"
                                 style="transform: rotate(var(--rotation)); --rotation: -1deg;"
                             >
                                 <div class="flex justify-between items-start mb-1">
-                                    <h5 class="font-bold text-sm text-[#4a3728]">{{ ad.title }}</h5>
+                                    <h5>{{ ad.title }}</h5>
                                 </div>
-                                <p class="text-xs leading-normal opacity-90 text-[#2c1810] font-medium">{{ ad.content }}</p>
+                                <p>{{ ad.content }}</p>
                             </div>
                          </div>
                     </div>
 
                     <!-- Oracle -->
-                    <div 
-                        class="mt-auto p-6 text-center cursor-pointer relative"
+                    <StyledSection 
+                        id="adv-horoscope"
+                        section-id="secondPage.horoscope"
+                        :section-styles="sectionStyles"
+                        tag="div"
+                        class="cursor-pointer relative overflow-hidden aspect-square flex flex-col justify-center items-center"
+                        content-class="w-full flex flex-col items-center"
                         :class="{ 'ring-2 ring-orange-900/50 rounded': isSelected('secondPage.horoscope') }"
-                        @click="(e) => handleSelect('secondPage.horoscope', 'Horoscope', e)"
+                        @click="(e: Event) => handleSelect('secondPage.horoscope', 'Horoscope', e)"
                     >
-                        <div class="absolute inset-0 border-2 border-[#8b5a2b] opacity-40 rounded-full" style="filter: url(#ink-bleed);"></div>
-                        <h4 class="text-xs uppercase font-bold mb-3 text-[#8b5a2b] tracking-[0.2em]">The Seer's Eye</h4>
-                        <p class="font-serif italic text-lg font-bold text-[#4a3728] leading-tight">"{{ data.secondPage.horoscope }}"</p>
-                    </div>
+                        <div class="border-ring" style="filter: url(#ink-bleed);"></div>
+                        <h4>The Seer's Eye</h4>
+                        <p>"{{ data.secondPage.horoscope }}"</p>
+                    </StyledSection>
                 </div>
 
                 <!-- Right Column -->
-                <div class="col-span-8 flex flex-col gap-8">
+                <div class="col-span-8 flex flex-col gap-4 overflow-hidden">
                     <!-- Editorial -->
                     <div 
-                        class="cursor-pointer relative pb-8"
+                        id="adv-editorial"
+                        class="cursor-pointer relative flex-1"
                         :class="{ 'ring-2 ring-orange-900/50 rounded': isSelected('secondPage.editorial') }"
                         @click="(e) => handleSelect('secondPage.editorial', 'Editorial', e)"
                     >
                         <!-- Decorative Header -->
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="h-[2px] flex-1 bg-[#4a3728] opacity-40"></div>
-                            <h2 class="text-3xl font-black uppercase whitespace-nowrap text-[#2c1810]" style="filter: url(#ink-bleed);">{{ data.secondPage.editorial.title }}</h2>
-                            <div class="h-[2px] flex-1 bg-[#4a3728] opacity-40"></div>
+                        <div class="header">
+                            <div class="line"></div>
+                            <h2 style="filter: url(#ink-bleed);">{{ data.secondPage.editorial.title }}</h2>
+                            <div class="line"></div>
                         </div>
                         
-                        <div class="columns-2 gap-8 text-base leading-7 text-justify whitespace-pre-wrap font-medium text-[#2c1810]">
+                        <StyledSection 
+                            section-id="secondPage.editorial"
+                            :section-styles="sectionStyles"
+                            tag="div"
+                            content-class="content"
+                        >
                             {{ data.secondPage.editorial.content }}
-                        </div>
+                        </StyledSection>
 
                          <!-- Horizontal Ink Divider -->
-                        <div class="absolute bottom-0 left-10 right-10 h-[2px] bg-[#4a3728] opacity-20" style="clip-path: polygon(0 50%, 100% 0, 95% 100%, 5% 90%); filter: url(#ink-bleed);"></div>
+                        <div class="divider" style="clip-path: polygon(0 50%, 100% 0, 95% 100%, 5% 90%); filter: url(#ink-bleed);"></div>
                     </div>
 
                     <!-- Market Watch -->
-                    <div 
-                        class="flex-1 bg-[#dcd0b9] p-6 shadow-inner cursor-pointer relative overflow-hidden"
+                    <StyledSection 
+                        id="adv-market"
+                        section-id="secondPage.culture"
+                        :section-styles="sectionStyles"
+                        tag="div"
+                        class="cursor-pointer relative overflow-hidden flex-1"
                         :class="{ 'ring-2 ring-orange-900/50': isSelected('secondPage.culture') }"
-                        @click="(e) => handleSelect('secondPage.culture', 'Market', e)"
+                        @click="(e: Event) => handleSelect('secondPage.culture', 'Market', e)"
                         style="clip-path: polygon(1% 1%, 99% 0, 100% 99%, 0 100%);"
                     >
                          <!-- Stain -->
-                        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-[#8b5a2b] opacity-10 rounded-full blur-xl"></div>
+                        <div class="stain"></div>
 
-                        <div class="flex items-center justify-between mb-4 border-b border-[#4a3728]/20 pb-2">
-                            <h3 class="text-xl font-bold uppercase text-[#654321]">{{ data.secondPage.culture.title }}</h3>
+                        <div class="header">
+                            <h3>{{ data.secondPage.culture.title }}</h3>
                         </div>
-                        <p class="text-sm leading-relaxed text-justify whitespace-pre-wrap font-medium opacity-90">{{ data.secondPage.culture.content }}</p>
-                    </div>
+                        <p>{{ data.secondPage.culture.content }}</p>
+                    </StyledSection>
                 </div>
                 
             </div>
@@ -335,3 +455,241 @@ const adventurerColors = computed(() => ({
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Header Styles */
+#adv-header h1 {
+  @apply text-4xl font-black uppercase tracking-widest leading-none text-[#2c1810] whitespace-nowrap;
+  filter: url(#ink-bleed);
+  text-shadow: 2px 2px 0px rgba(139,69,19,0.3);
+}
+
+#adv-header .subtitle {
+  @apply text-xs font-bold tracking-[0.3em] uppercase text-[#8b5a2b] mt-1 pl-1;
+}
+
+#adv-date {
+  @apply text-2xl font-bold text-[#4a3728];
+  transform: rotate(-2deg);
+}
+
+#adv-header .meta {
+  @apply text-xs font-bold tracking-widest text-[#8b5a2b] opacity-80 mt-1;
+}
+
+/* Bounties Styles */
+#adv-bounties {
+  @apply bg-[#dfd3bc] p-4 shadow-lg transform -rotate-1;
+  box-shadow: 2px 4px 8px rgba(0,0,0,0.2);
+}
+
+#adv-bounties .pin {
+  @apply absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-[#8b4513] shadow-inner border border-[#4a3728]/50 z-20;
+}
+
+#adv-bounties .header {
+  @apply border-b-2 border-[#8b5a2b] pb-2 mb-2 flex items-center justify-center gap-2 opacity-80 border-dashed;
+}
+
+#adv-bounties .header h3 {
+  @apply font-bold text-lg uppercase;
+}
+
+#adv-bounties .content {
+  @apply leading-relaxed font-semibold text-[#4a3728] whitespace-pre-wrap font-serif;
+}
+
+/* Rumors Styles */
+#adv-rumors .header {
+  @apply font-bold text-base uppercase mb-2 text-[#654321] flex items-center gap-2 border-b border-[#654321] pb-1 w-max;
+  transform: rotate(1deg);
+}
+
+#adv-rumors .content {
+  @apply space-y-3 h-full flex flex-col;
+}
+
+#adv-rumors .item {
+  @apply cursor-pointer relative pl-3 flex flex-col;
+}
+
+#adv-rumors .dot {
+  @apply absolute left-0 top-1.5 w-1.5 h-1.5 bg-[#8b4513] rounded-full opacity-60;
+}
+
+#adv-rumors h5 {
+  @apply font-bold text-[#4a3728] mb-0.5 group-hover:text-[#8b4513] transition-colors;
+  font-size: 1.1em;
+}
+
+#adv-rumors p {
+  @apply leading-tight text-[#5d4037] italic;
+  font-size: 1em;
+}
+
+/* Headline Styles */
+#adv-headline {
+  @apply text-center;
+}
+
+#adv-headline h2 {
+  @apply text-4xl font-black leading-tight text-[#2c1810];
+}
+
+/* Main Image Styles */
+#adv-main-image {
+  @apply w-full h-72 p-2 bg-white shadow-md transform rotate-1 hover:rotate-0 transition-transform mb-3;
+}
+
+#adv-main-image .border-sketch {
+  @apply absolute inset-0 border-2 border-[#4a3728] opacity-80;
+}
+
+#adv-main-image .image-container {
+  @apply w-full h-full overflow-hidden relative grayscale-[0.2] sepia-[0.4] contrast-[1.1];
+}
+
+#adv-main-image img {
+  @apply w-full h-full object-cover;
+}
+
+#adv-main-image .placeholder {
+  @apply w-full h-full flex items-center justify-center bg-[#f0e6d2] text-[#8b5a2b] font-serif italic text-lg opacity-60;
+}
+
+/* Main Story Styles */
+#adv-main-story {
+  flex: 1;
+  columns: 2;
+  column-gap: var(--section-gap, 1.25rem);
+  text-align: justify;
+  color: #2c1810;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  width: var(--section-width, auto);
+  height: var(--section-height, auto);
+  transform: translate(var(--section-offset-x, 0), var(--section-offset-y, 0));
+  padding: var(--section-padding, 0);
+  font-size: var(--section-font-size, inherit);
+  line-height: var(--section-line-height, 1.8);
+}
+
+#adv-main-story .content {
+  @apply cursor-pointer first-letter:text-3xl first-letter:font-black first-letter:float-left first-letter:mr-2 first-letter:leading-none first-letter:text-[#654321];
+}
+
+/* Footer Styles */
+#adv-footer .spacer {
+  @apply absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 bg-[#8b4513] opacity-30 rounded-full;
+}
+
+#adv-decrees h4 {
+  @apply font-bold uppercase mb-1 text-[#8b5a2b] tracking-wider;
+}
+
+#adv-decrees p {
+  @apply leading-snug opacity-90 font-medium;
+}
+
+#adv-monster-guide {
+  @apply bg-[#2c1810] text-[#e6dcc3] p-2 shadow-inner transform -rotate-1;
+  clip-path: polygon(2% 2%, 98% 0, 100% 98%, 0 100%);
+}
+
+#adv-monster-guide h4 {
+  @apply font-bold uppercase mb-1 flex items-center gap-1 text-[#d2b48c] border-b border-[#d2b48c]/30 pb-1;
+}
+
+#adv-monster-guide p {
+  @apply leading-snug italic opacity-90;
+}
+
+/* Page 2 Styles */
+/* Party Board */
+#adv-party-board .header {
+  @apply text-center mb-6 relative;
+}
+
+#adv-party-board .header .line {
+  @apply absolute inset-x-0 bottom-1 h-[1px] bg-[#4a3728] opacity-40;
+}
+
+#adv-party-board h3 {
+  @apply text-2xl font-black uppercase tracking-widest text-[#654321];
+}
+
+#adv-party-board .ad-item {
+  @apply p-3 bg-white/40 border border-[#8b5a2b]/30 shadow-sm cursor-pointer hover:bg-white/60 transition-colors;
+}
+
+#adv-party-board h5 {
+  @apply font-bold text-sm text-[#4a3728];
+}
+
+#adv-party-board p {
+  @apply text-xs leading-normal opacity-90 text-[#2c1810] font-medium;
+}
+
+/* Horoscope */
+#adv-horoscope {
+  @apply mt-auto p-4 text-center;
+}
+
+#adv-horoscope .border-ring {
+  @apply absolute inset-0 border-2 border-[#8b5a2b] opacity-40 rounded-full;
+}
+
+#adv-horoscope h4 {
+  @apply uppercase font-bold mb-2 text-[#8b5a2b] tracking-[0.15em];
+}
+
+#adv-horoscope p {
+  @apply font-serif italic font-bold text-[#4a3728] line-clamp-4;
+}
+
+/* Editorial */
+#adv-editorial {
+  @apply pb-4;
+}
+
+#adv-editorial .header {
+  @apply flex items-center gap-3 mb-4;
+}
+
+#adv-editorial .line {
+  @apply h-[2px] flex-1 bg-[#4a3728] opacity-40;
+}
+
+#adv-editorial h2 {
+  @apply text-2xl font-black uppercase whitespace-nowrap text-[#2c1810];
+}
+
+#adv-editorial .content {
+  @apply columns-2 gap-6 leading-6 text-justify whitespace-pre-wrap font-medium text-[#2c1810];
+}
+
+#adv-editorial .divider {
+  @apply absolute bottom-0 left-10 right-10 h-[2px] bg-[#4a3728] opacity-20;
+}
+
+/* Market Watch */
+#adv-market {
+  @apply bg-[#dcd0b9] p-4 shadow-inner;
+}
+
+#adv-market .stain {
+  @apply absolute -right-10 -bottom-10 w-40 h-40 bg-[#8b5a2b] opacity-10 rounded-full blur-xl;
+}
+
+#adv-market .header {
+  @apply flex items-center justify-between mb-2 border-b border-[#4a3728]/20 pb-1;
+}
+
+#adv-market h3 {
+  @apply text-[1.2em] font-bold uppercase text-[#654321];
+}
+
+#adv-market p {
+  @apply text-justify whitespace-pre-wrap font-medium opacity-90;
+}
+</style>

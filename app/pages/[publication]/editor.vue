@@ -2,8 +2,10 @@
 import PanelGenerator from '~/components/editor/PanelGenerator.vue'
 import PanelDashboard from '~/components/editor/PanelDashboard.vue'
 import PanelEdit from '~/components/editor/PanelEdit.vue'
+import PanelStyleAdjuster from '~/components/editor/PanelStyleAdjuster.vue'
 import { ThemeType, PublicationType } from '~/types'
 import { getEditorConfig } from '~/config/editorConfig'
+import { useSectionStyles } from '~/composables/useSectionStyles'
 
 const { t } = useI18n()
 
@@ -35,6 +37,34 @@ function handleManualCreate() {
     template.date = date.value
     createBlankTemplate(template, config.value.defaultTheme)
 }
+
+// Style adjustment
+const { updateSectionStyle, sectionStyles, setSectionStyles } = useSectionStyles()
+
+function handleStyleUpdate(sectionId: string, styles: any) {
+    console.log('handleStyleUpdate called:', sectionId, styles)
+    updateSectionStyle(sectionId, styles)
+    console.log('sectionStyles after update:', sectionStyles.value)
+    
+    // Also update previewContent with sectionStyles
+    if (previewContent.value) {
+        previewContent.value = {
+            ...previewContent.value,
+            sectionStyles: { ...sectionStyles.value }
+        }
+    }
+}
+
+// Watch previewContent to restore section styles when loading an issue
+watch(() => previewContent.value, (newContent) => {
+    if (newContent?.sectionStyles) {
+        console.log('Restoring section styles:', newContent.sectionStyles)
+        setSectionStyles(newContent.sectionStyles)
+    } else {
+        // Reset styles when content is cleared or new content without styles
+        setSectionStyles({})
+    }
+}, { immediate: true })
 
 const state = reactive({
     topic,
@@ -115,6 +145,15 @@ const state = reactive({
             :publication-type="publication.toUpperCase() as 'TRIANGLE' | 'DUSKVOL' | 'ADVENTURER'"
         />
       </div>
+
+      <!-- Style Adjuster Panel (bottom of sidebar) -->
+      <PanelStyleAdjuster 
+        v-if="previewContent"
+        :selected-section-id="selectedPath"
+        :selected-label="selectedLabel"
+        :current-styles="selectedPath ? sectionStyles[selectedPath] : undefined"
+        @update:style="handleStyleUpdate"
+      />
     </div>
 
     <!-- Preview Area -->
@@ -141,6 +180,7 @@ const state = reactive({
               :page="1"
               :on-section-select="handleSectionSelect"
               :selected-section-id="selectedPath"
+              :section-styles="sectionStyles"
             />
           </div>
 
@@ -159,6 +199,7 @@ const state = reactive({
               :page="2"
               :on-section-select="handleSectionSelect"
               :selected-section-id="selectedPath"
+              :section-styles="sectionStyles"
             />
           </div>
         </div>
@@ -378,5 +419,35 @@ const state = reactive({
 }
 [data-theme="parchment"] :deep(#tip-box) {
     @apply bg-[#d9cdb8]/50 text-[#8b5a2b] border-[#d2b48c];
+}
+
+/* Style Adjuster Overrides - Dark */
+[data-theme="dark"] :deep(#style-adjuster),
+[data-theme="dark"] :deep(#style-adjuster-empty) {
+    @apply bg-stone-800 border-stone-700 text-stone-500;
+}
+[data-theme="dark"] :deep(#style-adjuster h3) {
+    @apply text-stone-300;
+}
+[data-theme="dark"] :deep(.style-control label) {
+    @apply text-stone-500;
+}
+[data-theme="dark"] :deep(#btn-reset-style) {
+    @apply border-stone-600 text-stone-400 hover:bg-stone-700;
+}
+
+/* Style Adjuster Overrides - Parchment */
+[data-theme="parchment"] :deep(#style-adjuster),
+[data-theme="parchment"] :deep(#style-adjuster-empty) {
+    @apply bg-[#e6dcc3] border-[#d2b48c] text-[#8b5a2b];
+}
+[data-theme="parchment"] :deep(#style-adjuster h3) {
+    @apply text-[#4a3728];
+}
+[data-theme="parchment"] :deep(.style-control label) {
+    @apply text-[#8b5a2b];
+}
+[data-theme="parchment"] :deep(#btn-reset-style) {
+    @apply border-[#d2b48c] text-[#8b5a2b] hover:bg-[#d9cdb8];
 }
 </style>

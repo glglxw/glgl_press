@@ -79,6 +79,7 @@ export interface GeneratedContent {
     theme: ThemeType;
     status?: IssueStatus;
     publishedAt?: string;
+    sectionStyles?: Record<string, any>;
 }
 
 export interface ThemeColors {

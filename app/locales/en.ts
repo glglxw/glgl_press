@@ -41,7 +41,16 @@ export default {
         // Editor page
         previewHint: 'Preview the generated newspaper here',
         previewHintDuskvol: 'The printing press awaits...',
-        mdHint: 'MD: **bold** *italic* # Large'
+        mdHint: 'MD: **bold** *italic* # Large',
+
+        // Style Adjuster
+        styleTitle: 'Styles',
+        reset: 'Reset',
+        fontSize: 'Font Size',
+        lineHeight: 'Line Height',
+        offsetX: 'Offset X',
+        offsetY: 'Offset Y',
+        selectSectionToAdjust: 'Select a section to adjust styles'
     },
     publication: {
         common: {
