@@ -142,7 +142,9 @@ export function useNewsEditor(publicationType: PublicationType) {
         let current: any = previewContent.value.textData
         for (let i = 0; i < keys.length - 1; i++) {
             if (!current) return
-            current = current[keys[i]]
+            const key = keys[i]
+            if (key === undefined) return
+            current = current[key]
         }
 
         const lastKey = keys[keys.length - 1]

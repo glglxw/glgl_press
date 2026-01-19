@@ -12,7 +12,7 @@ const REQUIRED_STYLE_KEYS: (keyof PublicationStyles)[] = [
 
 describe('EDITOR_CONFIGS', () => {
     it('should have TRIANGLE config with correct defaults', () => {
-        const config = EDITOR_CONFIGS.TRIANGLE
+        const config = EDITOR_CONFIGS.TRIANGLE!
         expect(config.publicationType).toBe(PublicationType.TRIANGLE)
         expect(config.defaultTheme).toBe(ThemeType.CLASSIC_RED)
         expect(config.title).toBe('三角日报编辑器')
@@ -20,7 +20,7 @@ describe('EDITOR_CONFIGS', () => {
     })
 
     it('should have DUSKVOL config with correct defaults', () => {
-        const config = EDITOR_CONFIGS.DUSKVOL
+        const config = EDITOR_CONFIGS.DUSKVOL!
         expect(config.publicationType).toBe(PublicationType.DUSKVOL)
         expect(config.defaultTheme).toBe(ThemeType.NOIR)
         expect(config.title).toBe('The Press Room')
@@ -28,7 +28,7 @@ describe('EDITOR_CONFIGS', () => {
     })
 
     it('should have ADVENTURER config with correct defaults', () => {
-        const config = EDITOR_CONFIGS.ADVENTURER
+        const config = EDITOR_CONFIGS.ADVENTURER!
         expect(config.publicationType).toBe(PublicationType.ADVENTURER)
         expect(config.defaultTheme).toBe(ThemeType.PARCHMENT)
         expect(config.title).toBe('冒险者工会日报')

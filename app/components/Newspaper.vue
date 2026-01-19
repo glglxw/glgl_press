@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { NewsData, ThemeType, ThemeColors, PublicationType } from '~/types'
+import type { SectionStyles } from '~/composables/useSectionStyles'
 import NewspaperTriangle from './NewspaperTriangle.vue'
 import NewspaperDuskvol from './NewspaperDuskvol.vue'
 import NewspaperAdventurer from './NewspaperAdventurer.vue'
@@ -12,6 +13,7 @@ interface Props {
   page: 1 | 2
   onSectionSelect?: (path: string, label: string) => void
   selectedSectionId?: string | null
+  sectionStyles?: Record<string, SectionStyles>
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -75,6 +77,7 @@ const volumeNumber = computed(() => {
     :image-src="imageSrc"
     :page="page"
     :selected-section-id="selectedSectionId"
+    :section-styles="sectionStyles"
     :on-section-select="onSectionSelect"
   />
   
@@ -86,6 +89,7 @@ const volumeNumber = computed(() => {
     :image-src="imageSrc"
     :page="page"
     :selected-section-id="selectedSectionId"
+    :section-styles="sectionStyles"
     :on-section-select="onSectionSelect"
   />
 
@@ -99,6 +103,7 @@ const volumeNumber = computed(() => {
     :image-src="imageSrc"
     :page="page"
     :selected-section-id="selectedSectionId"
+    :section-styles="sectionStyles"
     :on-section-select="onSectionSelect"
   />
 </template>

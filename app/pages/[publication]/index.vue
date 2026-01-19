@@ -217,6 +217,7 @@ async function handleDownload(type: 'page1' | 'page2' | 'all') {
               :publication-type="config.publicationType"
               :image-src="data.imageBase64"
               :page="1"
+              :section-styles="data.sectionStyles"
             />
           </div>
 
@@ -231,6 +232,7 @@ async function handleDownload(type: 'page1' | 'page2' | 'all') {
               :theme="config.defaultTheme"
               :publication-type="config.publicationType"
               :page="2"
+              :section-styles="data.sectionStyles"
             />
           </div>
         </div>

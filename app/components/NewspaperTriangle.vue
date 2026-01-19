@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { TriangleLogo, TrianglePattern } from '#components'
+import { TriangleLogo, TrianglePattern, StyledSection } from '#components'
 import type { NewsData, ThemeType, ThemeColors } from '~/types'
+import type { SectionStyles } from '~/composables/useSectionStyles'
 import MarkdownIt from 'markdown-it'
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
   page: 1 | 2
   selectedSectionId?: string | null
   onSectionSelect?: (path: string, label: string) => void
+  sectionStyles?: Record<string, SectionStyles>
 }
 
 const props = defineProps<Props>()
@@ -99,25 +101,31 @@ function renderMd(text: string) {
                 今日头条
               </h2>
             </div>
-            <div
+            <StyledSection
+              section-id="frontPage.headline"
+              :section-styles="sectionStyles"
+              content-class="text-2xl font-bold font-sans leading-tight"
               class="cursor-pointer"
               :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('frontPage.headline') }"
-              @click="(e) => handleSelect('frontPage.headline', 'Headline', e)"
+              @click="(e: Event) => handleSelect('frontPage.headline', 'Headline', e)"
             >
-              <h3 class="text-2xl font-bold font-sans leading-tight" :style="{ color: colors.primary }">
+              <h3 :style="{ color: colors.primary }">
                 ▲ {{ data.frontPage.headline }}
               </h3>
-            </div>
-            <div
+            </StyledSection>
+            <StyledSection
+              section-id="frontPage.mainStory"
+              :section-styles="sectionStyles"
+              content-class="text-sm font-serif text-justify leading-snug opacity-90 whitespace-pre-wrap line-clamp-[12]"
               class="cursor-pointer"
               :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('frontPage.mainStory') }"
-              @click="(e) => handleSelect('frontPage.mainStory', 'Main Story', e)"
+              @click="(e: Event) => handleSelect('frontPage.mainStory', 'Main Story', e)"
             >
-              <div class="text-sm font-serif text-justify leading-snug opacity-90 whitespace-pre-wrap line-clamp-[12]">
+              <div>
                 <span class="font-bold text-base float-left mr-2 leading-none" :style="{ color: colors.primary }">{{ data.location }} —</span>
                 {{ data.frontPage.mainStory }}
               </div>
-            </div>
+            </StyledSection>
           </div>
           <div class="col-span-5 relative">
             <div
@@ -146,108 +154,132 @@ function renderMd(text: string) {
                 本地快讯
               </h4>
               <div class="space-y-3 max-h-[180px] overflow-hidden">
-                <div
+                <StyledSection
                   v-for="(snippet, idx) in data.frontPage.newsSnippets"
                   :key="idx"
+                  :section-id="`frontPage.newsSnippets`"
+                  :section-styles="sectionStyles"
+                  content-class="text-xs"
                   class="relative pl-4 border-l-2 cursor-pointer"
                   :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected(`frontPage.newsSnippets.${idx}`) }"
                   :style="{ borderColor: colors.accent }"
-                  @click="(e) => handleSelect(`frontPage.newsSnippets.${idx}`, `Snippet ${idx+1}`, e)"
+                  @click="(e: Event) => handleSelect(`frontPage.newsSnippets.${idx}`, `Snippet ${idx+1}`, e)"
                 >
-                  <h5 class="font-bold font-sans text-sm leading-tight mb-1" :style="{ color: colors.secondary }">{{ snippet.title }}</h5>
-                  <p class="text-xs font-serif leading-tight opacity-80 text-justify line-clamp-2">{{ snippet.content }}</p>
-                </div>
+                  <h5 class="font-bold font-sans text-[1.16em] leading-tight mb-1" :style="{ color: colors.secondary }">{{ snippet.title }}</h5>
+                  <p class="font-serif leading-tight opacity-80 text-justify line-clamp-2">{{ snippet.content }}</p>
+                </StyledSection>
               </div>
             </div>
-            <div
+            <StyledSection
+              section-id="frontPage.column1"
+              :section-styles="sectionStyles"
+              content-class="text-xs font-serif text-justify leading-relaxed"
               class="cursor-pointer"
               :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('frontPage.column1') }"
-              @click="(e) => handleSelect('frontPage.column1', 'Column 1', e)"
+              @click="(e: Event) => handleSelect('frontPage.column1', 'Column 1', e)"
             >
               <h4 class="text-xl font-sans font-bold mb-2 text-center" :style="{ color: colors.primary }">{{ data.frontPage.column1.title }}</h4>
-              <p class="text-xs font-serif text-justify leading-relaxed columns-2 gap-4 line-clamp-4">{{ data.frontPage.column1.content }}</p>
-            </div>
+              <p class="columns-2 gap-4 line-clamp-4">{{ data.frontPage.column1.content }}</p>
+            </StyledSection>
           </div>
           <div class="flex flex-col gap-6 overflow-hidden">
-            <div
+            <StyledSection
+              section-id="frontPage.column2"
+              :section-styles="sectionStyles"
+              content-class="font-serif text-justify leading-relaxed text-[11px]"
               class="flex-1 relative cursor-pointer"
               :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('frontPage.column2') }"
-              @click="(e) => handleSelect('frontPage.column2', 'Column 2', e)"
+              @click="(e: Event) => handleSelect('frontPage.column2', 'Column 2', e)"
             >
               <div class="absolute -left-2 top-2 w-0 h-0 border-l-[10px] border-l-transparent border-t-[10px] border-r-[10px] border-r-transparent" :style="{ borderTopColor: colors.primary }"></div>
               <h4 class="text-xl font-sans font-bold uppercase mb-2 pl-4" :style="{ color: colors.secondary }">{{ data.frontPage.column2.title }}</h4>
-              <p class="font-serif text-justify leading-relaxed" style="font-size: clamp(9px, 1.2vw, 11px);">{{ data.frontPage.column2.content }}</p>
-            </div>
-            <div
+              <p>{{ data.frontPage.column2.content }}</p>
+            </StyledSection>
+            <StyledSection
+              section-id="frontPage.weirdNews"
+              :section-styles="sectionStyles"
+              content-class="text-xs font-serif leading-relaxed italic text-justify"
               class="flex-1 cursor-pointer bg-opacity-10 px-4 pt-4 pb-2 rounded-tl-[40px] relative"
               :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('frontPage.weirdNews') }"
               :style="{ backgroundColor: colors.accent }"
-              @click="(e) => handleSelect('frontPage.weirdNews', 'Weird News', e)"
+              @click="(e: Event) => handleSelect('frontPage.weirdNews', 'Weird News', e)"
             >
               <div class="absolute -top-6 right-4">
                 <TriangleLogo class="w-16 h-16 animate-bounce" :color="colors.primary" />
               </div>
               <h4 class="text-xl font-sans font-black uppercase mb-2 text-right mt-4" :style="{ color: colors.primary }">{{ data.frontPage.weirdNews.title }}</h4>
-              <p class="text-xs font-serif leading-relaxed italic text-justify">{{ data.frontPage.weirdNews.content }}</p>
-            </div>
+              <p>{{ data.frontPage.weirdNews.content }}</p>
+            </StyledSection>
           </div>
         </div>
       </div>
 
       <!-- Page 2 Content -->
       <div v-if="page === 2" class="flex-1 p-8 grid grid-cols-12 gap-8 overflow-hidden">
-        <div class="col-span-8 flex flex-col gap-8">
-          <div
+        <div class="col-span-8 flex flex-col gap-8 h-full">
+          <StyledSection
+            section-id="secondPage.editorial"
+            :section-styles="sectionStyles"
+            content-class="text-sm font-serif text-justify leading-relaxed opacity-90"
             class="border-b-2 pb-6 cursor-pointer"
             :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('secondPage.editorial') }"
             :style="{ borderColor: colors.secondary }"
-            @click="(e) => handleSelect('secondPage.editorial', 'Editorial', e)"
+            @click="(e: Event) => handleSelect('secondPage.editorial', 'Editorial', e)"
           >
             <h2 class="text-4xl font-sans font-black uppercase mb-4 tracking-tight" :style="{ color: colors.secondary }">
               社论：<span :style="{ color: colors.primary }">{{ data.secondPage.editorial.title }}</span>
             </h2>
-            <div class="text-sm font-serif text-justify leading-relaxed columns-2 gap-8 opacity-90 first-letter:text-4xl first-letter:font-bold first-letter:float-left first-letter:mr-2 max-h-[280px] overflow-hidden" v-html="renderMd(data.secondPage.editorial.content)"></div>
-          </div>
-          <div
+            <div class="columns-2 gap-8 first-letter:text-4xl first-letter:font-bold first-letter:float-left first-letter:mr-2 max-h-[280px] overflow-hidden" v-html="renderMd(data.secondPage.editorial.content)"></div>
+          </StyledSection>
+          <StyledSection
+            section-id="secondPage.culture"
+            :section-styles="sectionStyles"
+            content-class="text-sm font-serif leading-relaxed text-justify whitespace-pre-wrap h-full"
             class="flex-1 bg-opacity-5 p-6 rounded-lg border cursor-pointer"
             :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('secondPage.culture') }"
             :style="{ backgroundColor: colors.accent, borderColor: colors.primary }"
-            @click="(e) => handleSelect('secondPage.culture', 'Culture', e)"
+            @click="(e: Event) => handleSelect('secondPage.culture', 'Culture', e)"
           >
             <div class="flex items-center gap-2 mb-4 border-b pb-2" :style="{ borderColor: colors.primary }">
               <div class="w-4 h-4 rounded-full" :style="{ backgroundColor: colors.primary }"></div>
               <h3 class="text-xl font-sans font-bold uppercase" :style="{ color: colors.secondary }">{{ data.secondPage.culture.title }}</h3>
             </div>
-            <p class="text-sm font-serif leading-relaxed text-justify whitespace-pre-wrap line-clamp-[10]">{{ data.secondPage.culture.content }}</p>
-          </div>
+            <p>{{ data.secondPage.culture.content }}</p>
+          </StyledSection>
         </div>
-        <div class="col-span-4 flex flex-col gap-6 border-l pl-6" :style="{ borderColor: colors.secondary }">
+        <div class="col-span-4 flex flex-col gap-6 border-l pl-6 h-full" :style="{ borderColor: colors.secondary }">
           <div class="flex-1">
             <div class="bg-stone-900 text-white p-2 mb-4 text-center font-sans font-bold uppercase tracking-widest" :style="{ backgroundColor: colors.secondary }">分类广告</div>
             <div class="space-y-4">
-              <div
+              <StyledSection
                 v-for="(ad, idx) in data.secondPage.classifieds"
                 :key="idx"
+                section-id="secondPage.classifieds"
+                :section-styles="sectionStyles"
+                content-class="text-xs"
                 class="border-b pb-2 last:border-0 border-dashed cursor-pointer"
-                :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected(`secondPage.classifieds.${idx}`) }"
+                :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('secondPage.classifieds') }"
                 :style="{ borderColor: colors.accent }"
-                @click="(e) => handleSelect(`secondPage.classifieds.${idx}`, `Classified ${idx+1}`, e)"
+                @click="(e: Event) => handleSelect('secondPage.classifieds', 'Classifieds', e)"
               >
-                <h5 class="font-bold text-sm mb-1" :style="{ color: colors.primary }">▲ {{ ad.title }}</h5>
-                <p class="text-xs font-serif opacity-80 leading-tight">{{ ad.content }}</p>
-              </div>
+                <h5 class="font-bold text-[1.16em] mb-1" :style="{ color: colors.primary }">▲ {{ ad.title }}</h5>
+                <p class="font-serif opacity-80 leading-tight">{{ ad.content }}</p>
+              </StyledSection>
             </div>
           </div>
-          <div
+          <StyledSection
+            section-id="secondPage.horoscope"
+            :section-styles="sectionStyles"
+            content-class="font-serif italic font-bold text-lg leading-snug"
             class="mt-auto border-4 p-4 text-center cursor-pointer"
             :class="{ 'ring-4 ring-red-500 ring-opacity-50 z-20': isSelected('secondPage.horoscope') }"
             :style="{ borderColor: colors.primary }"
-            @click="(e) => handleSelect('secondPage.horoscope', 'Horoscope', e)"
+            @click="(e: Event) => handleSelect('secondPage.horoscope', 'Horoscope', e)"
           >
             <TriangleLogo class="w-8 h-8 mx-auto mb-2" :color="colors.accent" />
             <h4 class="font-sans font-bold uppercase text-xs tracking-widest mb-2 opacity-60">每日箴言</h4>
-            <p class="font-serif italic font-bold text-lg leading-snug" :style="{ color: colors.secondary }">"{{ data.secondPage.horoscope }}"</p>
-          </div>
+            <p :style="{ color: colors.secondary }">"{{ data.secondPage.horoscope }}"</p>
+          </StyledSection>
         </div>
       </div>
 

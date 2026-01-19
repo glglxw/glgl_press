@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
             // Update existing
             newIssue = {
                 ...body,
-                publishedAt: issues[existingIndex].publishedAt // Keep original published date
+                publishedAt: issues[existingIndex]!.publishedAt // Keep original published date
             }
             issues[existingIndex] = newIssue
         } else {

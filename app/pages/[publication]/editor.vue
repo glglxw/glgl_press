@@ -66,6 +66,20 @@ watch(() => previewContent.value, (newContent) => {
     }
 }, { immediate: true })
 
+// Compute the style path (mapping individual items to shared styles for some sections)
+const selectedStylePath = computed(() => {
+    const path = selectedPath.value
+    if (!path) return null
+
+    // Special handling for Triangle repeating sections sharing styles
+    if (publication.value === 'triangle') {
+        if (path.startsWith('frontPage.newsSnippets.')) return 'frontPage.newsSnippets'
+        if (path.startsWith('secondPage.classifieds.')) return 'secondPage.classifieds'
+    }
+    
+    return path
+})
+
 const state = reactive({
     topic,
     date,
@@ -149,9 +163,9 @@ const state = reactive({
       <!-- Style Adjuster Panel (bottom of sidebar) -->
       <PanelStyleAdjuster 
         v-if="previewContent"
-        :selected-section-id="selectedPath"
+        :selected-section-id="selectedStylePath"
         :selected-label="selectedLabel"
-        :current-styles="selectedPath ? sectionStyles[selectedPath] : undefined"
+        :current-styles="selectedStylePath ? sectionStyles[selectedStylePath] : undefined"
         @update:style="handleStyleUpdate"
       />
     </div>
